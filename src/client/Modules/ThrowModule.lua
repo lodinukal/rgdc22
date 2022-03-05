@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local camera = workspace.CurrentCamera
 local Common = ReplicatedStorage:WaitForChild("Common")
 
-local Fusion = require(Common:WaitForChild("Fusion"))
+local Fusion = require(Common:WaitForChild("fusion"))
 
 local ThrowModule = {}
 ThrowModule.HoldDistance = 30
