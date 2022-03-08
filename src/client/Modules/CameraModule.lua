@@ -23,7 +23,6 @@ local emulatedLookAxisTarget = { 0, 0 }
 function CameraModule:Start()
 	CameraModule.MouseFollowing = true
 	CameraModule.connection = RunService.Heartbeat:Connect(function(deltaTime)
-		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 		character = Player.Character
 		if not character and character.PrimaryPart then
 			return
@@ -42,6 +41,8 @@ function CameraModule:Start()
 			1 - math.exp(-20 * deltaTime)
 		)
 		Camera.CFrame = calculatedCFrame
+
+		UserInputService.MouseBehavior = if CameraModule.MouseFollowing then Enum.MouseBehavior.LockCenter else Enum.MouseBehavior.Default
 	end)
 
 	UserInputService.InputChanged:Connect(function(input, gameProcessed)
@@ -73,8 +74,7 @@ function CameraModule:HandleAction(input: InputObject)
 end
 
 function CameraModule:Modal(enable: boolean)
-	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-	CameraModule.MouseFollowing = false
+	CameraModule.MouseFollowing = not enable
 end
 
 function CameraModule:Stop()
