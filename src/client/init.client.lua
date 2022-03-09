@@ -10,10 +10,6 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
-local Narrator = require(Modules:WaitForChild("Narrator"))
-local ThrowModule = require(Modules:WaitForChild("ThrowModule"))
-local LaserDoor = require(Modules:WaitForChild("LaserDoor"))
-local DoubleJump = require(Modules:WaitForChild("DoubleJump"))
 local WindLines = require(Modules:WaitForChild("WindLines"))
 --local CameraModule = require(Modules:WaitForChild("CameraModule"))
 
