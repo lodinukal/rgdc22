@@ -12,9 +12,10 @@ local Gui = script:WaitForChild("Gui")
 
 local Narrator = require(Modules:WaitForChild("Narrator"))
 local ThrowModule = require(Modules:WaitForChild("ThrowModule"))
-local LaserModule = require(Modules:WaitForChild("LaserModule"))
+local LaserDoor = require(Modules:WaitForChild("LaserDoor"))
 local DoubleJump = require(Modules:WaitForChild("DoubleJump"))
 local WindLines = require(Modules:WaitForChild("WindLines"))
+--local CameraModule = require(Modules:WaitForChild("CameraModule"))
 
 local Dialogue = require(Gui:WaitForChild("Dialogue"))
 local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
