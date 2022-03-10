@@ -11,6 +11,8 @@ local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
+local LevelModule = require(Modules:WaitForChild("LevelModule"))
+LevelModule:Start()
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
 PhysicsModule:Start()
 
