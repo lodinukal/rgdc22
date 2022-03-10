@@ -42,7 +42,9 @@ function CameraModule:Start()
 		)
 		Camera.CFrame = calculatedCFrame
 
-		UserInputService.MouseBehavior = if CameraModule.MouseFollowing then Enum.MouseBehavior.LockCenter else Enum.MouseBehavior.Default
+		UserInputService.MouseBehavior = if CameraModule.MouseFollowing
+			then Enum.MouseBehavior.LockCenter
+			else Enum.MouseBehavior.Default
 	end)
 
 	UserInputService.InputChanged:Connect(function(input, gameProcessed)
@@ -84,6 +86,6 @@ function CameraModule:Stop()
 	end
 end
 
-CameraModule:Start()
+-- CameraModule:Start()
 
 return CameraModule
