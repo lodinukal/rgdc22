@@ -6,6 +6,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
+local Time = require(script.Parent:WaitForChild("Time"))
 
 local TAG = "wp_scaleable"
 local PUSH_PULL_BINDING = "wp_pushpull_tool"
@@ -38,6 +39,10 @@ function Phys:Start()
 			self:UpdatePushPull(self.Target)
 		end
 	end)
+
+	for _, object in ipairs(CollectionService:GetTagged(TAG)) do
+		self:LoadTarget(object)
+	end
 
 	self.creationConnection = CollectionService:GetInstanceAddedSignal(TAG):Connect(function(object: BasePart)
 		self:LoadTarget(object)
@@ -76,6 +81,8 @@ function Phys:TargetSetPushPull(delta: number)
 	if not self.Target then
 		return
 	end
+
+	Time:SetTimeScale(if self.Extrusion ~= 0 or self.Intrusion ~= 0 then 0.1 else 1)
 
 	local cache = self.TrackedTargets[self.Target]
 	cache.delta = math.clamp(cache.delta + dir * delta * MORPH_SPEED, 1, cache.limit or 5)
@@ -135,7 +142,7 @@ function Phys:FindDeformable()
 		return nil
 	end
 	local greatest = nil
-	local highest = 0
+	local highest = -math.huge
 
 	local mat = workspace.CurrentCamera.CFrame
 	local partsInRadius = workspace:GetPartBoundsInRadius(mat.Position, DISTANCE_CHECK)

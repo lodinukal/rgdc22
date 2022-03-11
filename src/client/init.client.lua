@@ -16,6 +16,8 @@ LevelModule:Start()
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
 PhysicsModule:Start()
 
+local Time = require(Modules:WaitForChild("Time"))
+
 local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 
