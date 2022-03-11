@@ -20,11 +20,3 @@ local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 
 local Player = game.Players.LocalPlayer
-
-local e = workspace:WaitForChild("scale")
-
-while task.wait(3) do
-	PhysicsModule:ChangeTarget(e)
-	task.wait(3)
-	PhysicsModule:ChangeTarget(nil :: BasePart)
-end
