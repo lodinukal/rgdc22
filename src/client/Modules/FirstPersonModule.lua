@@ -7,13 +7,17 @@ local Camera = workspace.CurrentCamera
 local FirstPersonModule = {}
 FirstPersonModule.Speeds = {
     Normal = 3,
-    Walking = 6
+    Walking = 5
 }
 FirstPersonModule.Intensities = {
     Normal = 0.5,
-    Walking = 0.75
+    Walking = 1
 }
 FirstPersonModule.Smoothness = 0.2
+
+function lerp(start, goal, alpha)
+    return start + (goal - start) * alpha
+end
 
 function FirstPersonModule:Start()
     local character = Player.Character or Player.CharacterAdded:Wait()
@@ -23,8 +27,9 @@ function FirstPersonModule:Start()
     local Intensities = self.Intensities
     local Smoothness = self.Smoothness
 
-    local IdlePhase = 0
-    local WalkingPhase = 0
+    local Phase = 0
+    local Speed = Speeds.Normal
+    local Intensity = Intensities.Normal
     RunService:BindToRenderStep("FirstPerson", Enum.RenderPriority.Camera.Value, function(deltaTime) 
         local magnitude = humanoid.MoveDirection.Magnitude
 
@@ -33,16 +38,20 @@ function FirstPersonModule:Start()
         local z
 
         if magnitude > 0 then
-            WalkingPhase += deltaTime * Speeds.Walking
+            Speed = lerp(Speed, Speeds.Walking, self.Smoothness)
+            Phase += deltaTime * Speed
 
-            x = math.cos(WalkingPhase) * 0.5
-            y = math.sin(WalkingPhase) * Intensities.Walking
+            Intensity = lerp(Intensity, Intensities.Walking, self.Smoothness)
+            x = math.cos(Phase) * 0.5
+            y = math.sin(Phase) * Intensity
             z = -10
         else
-            IdlePhase += deltaTime * Speeds.Normal
+            Speed = lerp(Speed, Speeds.Normal, self.Smoothness)
+            Phase += deltaTime * Speed
 
-            x = math.cos(IdlePhase) * 0.5
-            y = math.sin(IdlePhase) * Intensities.Normal
+            Intensity = lerp(Intensity, Intensities.Normal, self.Smoothness)
+            x = math.cos(Phase) * 0.5
+            y = math.sin(Phase) * Intensity
             z = -10
         end
 
