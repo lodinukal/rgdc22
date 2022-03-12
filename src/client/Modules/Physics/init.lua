@@ -8,12 +8,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
 local Time = require(script.Parent:WaitForChild("Time"))
 
-local TAG = "wp_scaleable"
+local EXTRUSION_SIZE_TAG = "wp_scaleable"
+local SHOVE_TAG = "wp_shoveable"
+
 local PUSH_PULL_BINDING = "wp_pushpull_tool"
+local SHOVE_BINDING = "wp_shove_tool"
 local DISTANCE_CHECK = 16
 local VIEW_CHECK = 0.7
 
 local MORPH_SPEED = 9
+local SHOVE_SPEED = 3
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -22,35 +26,46 @@ local Phys = {
 	TrackedTargets = {},
 	ResizeSpeed = 0.5,
 
-	Mode = "PushPull",
+	Mode = "Shove",
 	Extrusion = 0,
 	Intrusion = 0,
+
+	Shoving = false,
 }
 
 function Phys:Start()
 	self.connection = RunService.Heartbeat:Connect(function(deltaTime)
-		if self.Mode ~= nil then
-			self:ChangeTarget(self:FindDeformable())
-		else
+		if self.Mode == nil then
 			self:ChangeTarget(nil :: BasePart)
 		end
 		if self.Mode == "PushPull" then
+			self:ChangeTarget(self:FindObject(EXTRUSION_SIZE_TAG))
 			self:TargetSetPushPull(deltaTime)
 			self:UpdatePushPull(self.Target)
 		end
+		if self.Mode == "Shove" then
+			self:ChangeTarget(self:FindObject(SHOVE_TAG))
+			self:DoShove(deltaTime)
+		end
 	end)
 
-	for _, object in ipairs(CollectionService:GetTagged(TAG)) do
+	for _, object in ipairs(CollectionService:GetTagged(EXTRUSION_SIZE_TAG)) do
 		self:LoadTarget(object)
 	end
 
-	self.creationConnection = CollectionService:GetInstanceAddedSignal(TAG):Connect(function(object: BasePart)
-		self:LoadTarget(object)
-	end)
+	self.creationConnection = CollectionService
+		:GetInstanceAddedSignal(EXTRUSION_SIZE_TAG)
+		:Connect(function(object: BasePart)
+			self:LoadTarget(object)
+		end)
 
 	ContextActionService:BindAction(PUSH_PULL_BINDING, function(...)
 		self:ProcessPushPull(...)
 	end, false, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
+
+	ContextActionService:BindAction(SHOVE_BINDING, function(...)
+		self:ProcessShove(...)
+	end, false, Enum.UserInputType.MouseButton3)
 end
 
 function Phys:ProcessPushPull(actionName, inputState, inputObject)
@@ -60,6 +75,14 @@ function Phys:ProcessPushPull(actionName, inputState, inputObject)
 		self.Extrusion = if inputState == Enum.UserInputState.Begin then 1 else 0
 	elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
 		self.Intrusion = if inputState == Enum.UserInputState.Begin then -1 else 0
+	end
+end
+
+function Phys:ProcessShove(actionName, inputState, inputObject)
+	inputObject = inputObject :: InputObject
+
+	if inputObject.UserInputType == Enum.UserInputType.MouseButton3 then
+		self.Shoving = inputState == Enum.UserInputState.Begin
 	end
 end
 
@@ -79,6 +102,7 @@ function Phys:TargetSetPushPull(delta: number)
 	local dir = self.Extrusion + self.Intrusion
 
 	if not self.Target then
+		Time:SetTimeScale(1)
 		return
 	end
 
@@ -86,6 +110,19 @@ function Phys:TargetSetPushPull(delta: number)
 
 	local cache = self.TrackedTargets[self.Target]
 	cache.delta = math.clamp(cache.delta + dir * delta * MORPH_SPEED, 1, cache.limit or 5)
+end
+
+function Phys:DoShove(delta)
+	if not self.Target then
+		Time:SetTimeScale(1)
+		return
+	end
+
+	Time:SetTimeScale(if self.Shoving then 0.1 else 1)
+
+	local target = self.Target :: BasePart
+	target.Anchored = not self.Shoving
+	target.CFrame += workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Shoving then 1 else 0)
 end
 
 function Phys:UnloadTarget(target: BasePart)
@@ -112,7 +149,9 @@ function Phys:LoadTarget(target: BasePart)
 		direction = target:GetAttribute("direction") or Vector3.new(1, 0, 0),
 		limit = target:GetAttribute("limit") or 10,
 	}
-	self:UpdatePushPull(target)
+	if CollectionService:HasTag(target, EXTRUSION_SIZE_TAG) then
+		self:UpdatePushPull(target)
+	end
 end
 
 function Phys:ChangeTarget(newTarget: BasePart)
@@ -121,12 +160,12 @@ function Phys:ChangeTarget(newTarget: BasePart)
 	(self.f_target :: any):set(newTarget)
 end
 
-local function Phys_m_DeformableInArea(mat: CFrame, deformable: BasePart)
-	if not deformable:IsA("BasePart") then
+local function Phys_m_ObjectInArea(mat: CFrame, object: BasePart)
+	if not object:IsA("BasePart") then
 		return false
 	end
 
-	local vec = deformable.Position - mat.Position
+	local vec = object.Position - mat.Position
 	local dot = vec.Unit:Dot(mat.LookVector.Unit)
 
 	if not (dot > VIEW_CHECK) then
@@ -136,7 +175,8 @@ local function Phys_m_DeformableInArea(mat: CFrame, deformable: BasePart)
 	return true, dot
 end
 
-function Phys:FindDeformable()
+function Phys:FindObject(tag)
+	tag = tag or EXTRUSION_SIZE_TAG
 	local playerCharacter = LocalPlayer.Character
 	if not playerCharacter then
 		return nil
@@ -148,8 +188,8 @@ function Phys:FindDeformable()
 	local partsInRadius = workspace:GetPartBoundsInRadius(mat.Position, DISTANCE_CHECK)
 
 	for _, object in pairs(partsInRadius) do
-		local valid, dot = Phys_m_DeformableInArea(mat, object)
-		if CollectionService:HasTag(object, TAG) and valid and highest < dot then
+		local valid, dot = Phys_m_ObjectInArea(mat, object)
+		if CollectionService:HasTag(object, tag) and valid and highest < dot then
 			highest = dot
 			greatest = object
 		end
