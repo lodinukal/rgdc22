@@ -16,7 +16,7 @@ local SHOVE_BINDING = "wp_shove_tool"
 local DISTANCE_CHECK = 16
 local VIEW_CHECK = 0.7
 
-local MORPH_SPEED = 9
+local MORPH_SPEED = 12
 local SHOVE_SPEED = 3
 
 local LocalPlayer = Players.LocalPlayer
@@ -26,7 +26,7 @@ local Phys = {
 	TrackedTargets = {},
 	ResizeSpeed = 0.5,
 
-	Mode = "Shove",
+	Mode = "PushPull",
 	Extrusion = 0,
 	Intrusion = 0,
 
@@ -92,9 +92,9 @@ function Phys:UpdatePushPull(target: BasePart)
 	end
 
 	local cache = self.TrackedTargets[target]
-	local sizeShift = cache.direction * cache.delta
+	local sizeShift: Vector3 = cache.direction * cache.delta
 
-	target.Size = sizeShift + cache.size
+	target.Size = Vector3.new(math.abs(sizeShift.X), math.abs(sizeShift.Y), math.abs(sizeShift.Z)) + cache.size
 	target.CFrame = cache.cframe * CFrame.new(sizeShift / 2)
 end
 
@@ -145,7 +145,7 @@ function Phys:LoadTarget(target: BasePart)
 	self.TrackedTargets[target] = {
 		cframe = target.CFrame,
 		size = target.Size,
-		delta = target:GetAttribute("delta"),
+		delta = math.max(target:GetAttribute("delta"), 1),
 		direction = target:GetAttribute("direction") or Vector3.new(1, 0, 0),
 		limit = target:GetAttribute("limit") or 10,
 	}
@@ -178,13 +178,26 @@ end
 function Phys:FindObject(tag)
 	tag = tag or EXTRUSION_SIZE_TAG
 	local playerCharacter = LocalPlayer.Character
-	if not playerCharacter then
+	if not playerCharacter or not playerCharacter.Parent or not playerCharacter.PrimaryPart then
 		return nil
 	end
-	local greatest = nil
-	local highest = -math.huge
 
 	local mat = workspace.CurrentCamera.CFrame
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { playerCharacter }
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+
+	local result = workspace:Raycast(mat.Position, mat.LookVector * DISTANCE_CHECK, params)
+
+	if result and CollectionService:HasTag(result.Instance, tag) then
+		return result.Instance
+	end
+
+	local greatest = nil
+	local highest = -math.huge
+	mat = playerCharacter.PrimaryPart.CFrame
+		* (workspace.CurrentCamera.CFrame :: CFrame & { Rotation: CFrame }).Rotation
+
 	local partsInRadius = workspace:GetPartBoundsInRadius(mat.Position, DISTANCE_CHECK)
 
 	for _, object in pairs(partsInRadius) do

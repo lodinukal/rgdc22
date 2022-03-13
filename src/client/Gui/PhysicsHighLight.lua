@@ -24,22 +24,29 @@ local highlightTransparency = Fusion.Computed(function()
 end)
 local tweenedHighlightTransparency = Fusion.Tween(highlightTransparency :: any, TWEEN_INFO)
 
-local highlightInstance = Fusion.New("SelectionBox")({
-	Adornee = Fusion.Computed(function()
-		local got = (targetObject :: any):get()
-		if not got then
-			return old
-		end
-		old = got
-		return got
-	end),
+local highlightInstance = Fusion.New("ScreenGui")({
+	Name = "HighlightContainer",
+	ResetOnSpawn = false,
 	Parent = Players.LocalPlayer:WaitForChild("PlayerGui"),
+	[Fusion.Children] = {
+		Fusion.New("SelectionBox")({
+			Adornee = Fusion.Computed(function()
+				local got = (targetObject :: any):get()
+				if not got then
+					return old
+				end
+				old = got
+				return got
+			end),
+			Parent = Players.LocalPlayer:WaitForChild("PlayerGui"),
 
-	Color3 = Color3.new(1, 1, 1),
-	LineThickness = 0.01,
-	SurfaceColor3 = Color3.new(0.090196, 0.243137, 0.921568),
-	SurfaceTransparency = tweenedSurfaceTransparency,
-	Transparency = tweenedHighlightTransparency,
+			Color3 = Color3.new(1, 1, 1),
+			LineThickness = 0.01,
+			SurfaceColor3 = Color3.new(0.090196, 0.243137, 0.921568),
+			SurfaceTransparency = tweenedSurfaceTransparency,
+			Transparency = tweenedHighlightTransparency,
+		}),
+	},
 })
 
 return highlightInstance

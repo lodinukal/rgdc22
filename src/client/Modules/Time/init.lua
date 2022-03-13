@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -22,17 +23,18 @@ function Time:SetTimeScale(timeScale: number)
 		return
 	end
 
-	local scaleDIff = timeScale / m_TimeScale:get()
-
-	workspace.Gravity *= scaleDIff ^ 2
+	local scaleDiff = timeScale / m_TimeScale:get()
+	workspace.Gravity *= scaleDiff
 
 	-- Player stuff
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character or player.CharacterAdded:Wait()
 		local humanoid = character:WaitForChild("Humanoid")
 
-		humanoid.JumpPower *= scaleDIff
-		humanoid.WalkSpeed *= scaleDIff
+		humanoid.WalkSpeed *= scaleDiff ^ (1 / 2)
+		humanoid.JumpPower *= scaleDiff ^ (1 / 2)
+
+		break
 	end
 
 	m_TimeScale:set(timeScale)

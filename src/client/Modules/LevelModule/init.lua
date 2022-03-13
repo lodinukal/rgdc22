@@ -31,7 +31,7 @@ function LevelModule:Start()
 	})
 
 	self.Character = Player.Character or Player.CharacterAdded:Wait()
-	LevelModule:LoadLevel("Level 2")
+	LevelModule:LoadLevel("Level 1")
 end
 
 function LevelModule:LoadLevel(levelName)
@@ -87,7 +87,7 @@ function LevelModule:LoadLevel(levelName)
 
 	self.LevelledUp:Fire(levelName)
 
-	levelModule.OnLoaded(clonedLevelFolder)
+	levelModule:OnLoaded(clonedLevelFolder)
 
 	local zone = ZonePlus.new(clonedLevelFolder.exit)
 	local hrp = self.Character:WaitForChild("HumanoidRootPart")
