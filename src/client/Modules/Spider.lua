@@ -1,9 +1,10 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Enemies = ReplicatedStorage:WaitForChild("Enemies")
+local Common = ReplicatedStorage:WaitForChild("Common")
 
-local spider = Enemies:WaitForChild("Spider")
+local RDL = require(Common:WaitForChild("RDL"))
+local setFrequency = RDL.setFrequency
 
 local Spider = {}
 Spider.__index = Spider
@@ -18,13 +19,12 @@ function Spider.new(model)
 end
 
 function Spider:Destroy()
-    self.Connection:Disconnect()
-    self.Update:Destroy()
+    self.Update:Disconnect()
 end
 
 function Spider:init()
-    self.Update = RunService.Heartbeat:Connect(function(deltaTime)
-        print(deltaTime)
+    setFrequency(10, function(...)
+        print(...)
     end)
 end
 

@@ -21,7 +21,7 @@ return function(frequency: number, callback: () -> nil): RBXScriptConnection
             elapsed += dt
             while elapsed >= period do
                   elapsed -= period
-                  callback()
+                  callback(dt)
             end
             elapsed_upval = elapsed
       end)
