@@ -7,10 +7,20 @@ local Data = {
 }
 
 local function OnLoaded(self, map)
-	print("I loaded!")
+
+end
+
+local function OnUnloaded(self, map)
+
+end
+
+local function CanProceed()
+	return true
 end
 
 return {
 	Data = Data,
 	OnLoaded = OnLoaded,
+	OnUnloaded = OnUnloaded,
+	CanProceed = CanProceed
 }
