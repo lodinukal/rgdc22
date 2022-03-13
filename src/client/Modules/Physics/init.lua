@@ -147,7 +147,7 @@ function Phys:LoadTarget(target: BasePart)
 	self.TrackedTargets[target] = {
 		cframe = target.CFrame,
 		size = target.Size,
-		delta = math.max(target:GetAttribute("delta"), 1),
+		delta = math.max(target:GetAttribute("delta") or 0, 1),
 		direction = target:GetAttribute("direction") or Vector3.new(1, 0, 0),
 		limit = target:GetAttribute("limit") or 10,
 	}
