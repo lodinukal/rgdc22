@@ -22,6 +22,11 @@ local LevelModules = {
 	["Level 2"] = require(script:WaitForChild("Level2")),
 }
 
+local LevelOrder = {
+	"Level 1",
+	"Level 2"
+}
+
 local LevelModule = {}
 
 function LevelModule:Start()
@@ -29,9 +34,26 @@ function LevelModule:Start()
 	self.Gui = LevelTransition({
 		LevelledUp = self.LevelledUp,
 	})
+	self.CurrentLevelName = LevelOrder[1]
 
-	self.Character = Player.Character or Player.CharacterAdded:Wait()
-	LevelModule:LoadLevel("Level 1")
+	local function CharacterAdded(character)
+		local currentLevelFolder = self.CurrentLevelFolder
+		if currentLevelFolder then
+			self:UnloadLevel(currentLevelFolder)
+		end
+
+		if not character.PrimaryPart then
+			character:GetPropertyChangedSignal("PrimaryPart"):Wait()
+		end
+		self:LoadLevel(self.CurrentLevelName)
+	end
+
+	Player.CharacterAdded:Connect(CharacterAdded)
+
+	local character = Player.Character
+	if character then
+		CharacterAdded(character)
+	end
 end
 
 function LevelModule:LoadLevel(levelName)
@@ -39,6 +61,7 @@ function LevelModule:LoadLevel(levelName)
 	if not levelModule then
 		return
 	end
+	self.LevelModule = levelModule
 
 	local clonedLevelFolder = levelModule.Data.Folder:Clone()
 	local lightsFolder = clonedLevelFolder:FindFirstChild("lights")
@@ -82,18 +105,36 @@ function LevelModule:LoadLevel(levelName)
 	end
 
 	clonedLevelFolder.Parent = workspace
+	self.CurrentLevelFolder = clonedLevelFolder
 
 	Player.Character:SetPrimaryPartCFrame(clonedLevelFolder.spawn.CFrame)
 
 	self.LevelledUp:Fire(levelName)
 
-	levelModule:OnLoaded(clonedLevelFolder)
+	levelModule.OnLoaded(clonedLevelFolder)
 
-	local zone = ZonePlus.new(clonedLevelFolder.exit)
-	local hrp = self.Character:WaitForChild("HumanoidRootPart")
-	zone:onItemEnter(hrp, function()
-		print("Hit exit")
-	end)
+	local exit = clonedLevelFolder:FindFirstChild("exit")
+	if exit then
+		local zone = ZonePlus.new(exit)
+		local hrp = Player.Character:WaitForChild("HumanoidRootPart")
+		zone:onItemEnter(hrp, function()
+			local canProceed = levelModule.CanProceed()
+			if not canProceed then
+				return
+			end
+
+			self:UnloadLevel(clonedLevelFolder)
+			local currentIndex = table.find(LevelOrder, levelName)
+			local nextIndex = currentIndex + 1
+			self:LoadLevel(LevelOrder[nextIndex])
+		end)
+	end
+end
+
+function LevelModule:UnloadLevel(map)
+	self.LevelModule.OnUnloaded(self, map)
+
+	map:Destroy()
 end
 
 return LevelModule
