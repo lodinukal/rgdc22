@@ -23,5 +23,7 @@ local FirstPersonModule = require(Modules:WaitForChild("FirstPersonModule"))
 FirstPersonModule:Start()
 
 local Time = require(Modules:WaitForChild("Time"))
+local Modality = require(Modules:WaitForChild("Modality"))
+Modality:Start()
 
 local Player = game.Players.LocalPlayer
