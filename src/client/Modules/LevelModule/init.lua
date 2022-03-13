@@ -111,7 +111,7 @@ function LevelModule:LoadLevel(levelName)
 
 	self.LevelledUp:Fire(levelName)
 
-	levelModule.OnLoaded(clonedLevelFolder)
+	levelModule:OnLoaded(clonedLevelFolder)
 
 	local exit = clonedLevelFolder:FindFirstChild("exit")
 	if exit then
@@ -132,7 +132,7 @@ function LevelModule:LoadLevel(levelName)
 end
 
 function LevelModule:UnloadLevel(map)
-	self.LevelModule.OnUnloaded(self, map)
+	self.LevelModule:OnUnloaded(map)
 
 	map:Destroy()
 end
