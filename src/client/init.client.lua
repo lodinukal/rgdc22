@@ -10,6 +10,10 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
+local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
+local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
+local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
+
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
 local LevelModule = require(Modules:WaitForChild("LevelModule"))
 LevelModule:Start()
@@ -19,8 +23,5 @@ local FirstPersonModule = require(Modules:WaitForChild("FirstPersonModule"))
 FirstPersonModule:Start()
 
 local Time = require(Modules:WaitForChild("Time"))
-
-local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
-local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 
 local Player = game.Players.LocalPlayer

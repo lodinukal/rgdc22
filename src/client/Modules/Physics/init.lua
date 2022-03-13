@@ -23,6 +23,8 @@ local LocalPlayer = Players.LocalPlayer
 
 local Phys = {
 	f_target = Fusion.Value(nil),
+	f_mode = Fusion.Value("PushPull"),
+
 	TrackedTargets = {},
 	ResizeSpeed = 0.5,
 
@@ -209,6 +211,11 @@ function Phys:FindObject(tag)
 	end
 
 	return greatest
+end
+
+function Phys:SetMode(newMode: string)
+	self.Mode = newMode;
+	(self.f_mode :: any):set(newMode)
 end
 
 return Phys
