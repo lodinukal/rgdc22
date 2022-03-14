@@ -1,3 +1,4 @@
+local StarterGui = game:GetService("StarterGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -27,6 +28,13 @@ local function LoadModuleWithDependenciesInjected(module: Instance)
 	end
 	if typeof(req) == "table" then
 		req.LaserModule = LaserModule
+		req.Requirements = function(warning)
+			StarterGui:SetCore("SendNotification", {
+				Title = "Requirements!",
+				Text = warning,
+				Icon = "rbxassetid://9100768166",
+			})
+		end
 	end
 
 	return req
@@ -161,7 +169,7 @@ function LevelModule:LoadLevel(levelName)
 
 		local connection = nil
 		connection = proximityPrompt.TriggerEnded:Connect(function()
-			local canProceed = levelModule.CanProceed()
+			local canProceed = levelModule:CanProceed()
 			if not canProceed then
 				-- notify of objectives
 				return

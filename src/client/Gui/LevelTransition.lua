@@ -22,7 +22,7 @@ end, false, Enum.KeyCode.H)
 
 local levelHints = {
 	["Level 1"] = "Hint - Try extruding the pipe.",
-	["Level 2"] = "Hint - Try rotating the laser beam generator to face the receiver on the wall.",
+	["Level 2"] = "Hint - Try rotating the laser beam generator to face the receiver on the wall. To get rotate tool press E, and to reverse the rotation direction hold Left Shift while rotating.",
 }
 
 local function LevelTransition(props)

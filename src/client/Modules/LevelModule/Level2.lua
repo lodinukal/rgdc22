@@ -12,13 +12,9 @@ local Client = PlayerScripts:WaitForChild("Client")
 
 local Modules = Client:WaitForChild("Modules")
 
-local Spider = require(Modules:WaitForChild("Spider"))
-
 local Data = {
 	Folder = Levels:WaitForChild("Level2"),
 }
-
-local Enemies = {}
 
 local LaserModule = require(script.Parent.Parent.Laser)
 local connection
@@ -28,11 +24,6 @@ local cached = false
 local tweenIndo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential)
 
 local function OnLoaded(self, map)
-	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new(v)
-		spider:init()
-	end
-
 	local lights = map._lights:GetChildren()
 
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -84,8 +75,10 @@ end
 
 local function OnUnloaded(self, map) end
 
-local function CanProceed()
-	print(lightsOn)
+local function CanProceed(self)
+	if not lightsOn then
+		self.Requirements("You need to turn on the lights!")
+	end
 	return lightsOn
 end
 
