@@ -16,7 +16,6 @@ local Data = {
 	Folder = Levels:WaitForChild("Level2"),
 }
 
-local LaserModule = require(script.Parent.Parent.Laser)
 local connection
 local lightsOn = false
 local cached = false
@@ -27,7 +26,7 @@ local function OnLoaded(self, map)
 	local lights = map._lights:GetChildren()
 
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
-		lightsOn = not not LaserModule.ReceiverIded["Level2Lights"]
+		lightsOn = not not self.LaserModule.ReceiverIded["Level2Lights"]
 		if lightsOn then
 			if cached == lightsOn then
 				return
@@ -73,7 +72,12 @@ local function OnLoaded(self, map)
 	end)
 end
 
-local function OnUnloaded(self, map) end
+local function OnUnloaded(self, map)
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
+end
 
 local function CanProceed(self)
 	if not lightsOn then

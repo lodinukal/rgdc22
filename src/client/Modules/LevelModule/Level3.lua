@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Levels = ReplicatedStorage:WaitForChild("Levels")
@@ -10,32 +11,36 @@ local Client = PlayerScripts:WaitForChild("Client")
 
 local Modules = Client:WaitForChild("Modules")
 
-local Spider = require(Modules:WaitForChild("Spider"))
-
 local Data = {
-	Folder = Levels:WaitForChild("Level2"),
+	Folder = Levels:WaitForChild("Level3"),
 }
 
-local Enemies = {}
+local doorOpen = false
+local connection = nil
 
 local function OnLoaded(self, map)
-	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new(v)
-		spider:init()
-	end
+	connection = RunService.Heartbeat:Connect(function(deltaTime)
+		doorOpen = not not self.LaserModule.ReceiverIded["Level2Lights"]
+	end)
 end
 
 local function OnUnloaded(self, map)
-	
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
 end
 
-local function CanProceed()
-	return (#Enemies == 0)
+local function CanProceed(self)
+	if not doorOpen then
+		self.Requirements("The door is locked, illuminate the LASER receiver.")
+	end
+	return doorOpen
 end
 
 return {
 	Data = Data,
 	OnLoaded = OnLoaded,
 	OnUnloaded = OnUnloaded,
-	CanProceed = CanProceed
+	CanProceed = CanProceed,
 }

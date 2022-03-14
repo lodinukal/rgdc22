@@ -43,11 +43,13 @@ end
 local LevelModules = {
 	["Level 1"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level1")),
 	["Level 2"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level2")),
+	["Level 3"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level3")),
 }
 
 local LevelOrder = {
 	"Level 1",
 	"Level 2",
+	"Level 3",
 }
 
 local LevelModule = {}

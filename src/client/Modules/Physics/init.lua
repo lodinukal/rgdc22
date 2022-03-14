@@ -13,7 +13,7 @@ local SHOVE_TAG = "wp_shoveable"
 
 local PUSH_PULL_BINDING = "wp_pushpull_tool"
 local DISTANCE_CHECK = 16
-local VIEW_CHECK = 0.7
+local VIEW_CHECK = 0.1
 
 local MORPH_SPEED = 12
 local SHOVE_SPEED = 3
@@ -109,6 +109,10 @@ end
 local targetOldAnchor = {}
 function Phys:DoShove(delta)
 	if not self.Target then
+		if targetOldAnchor and targetOldAnchor[1] then
+			targetOldAnchor[1].Anchored = targetOldAnchor[2]
+			targetOldAnchor = {}
+		end
 		Time:SetTimeScale(1)
 		return
 	end
@@ -117,21 +121,27 @@ function Phys:DoShove(delta)
 
 	local target = self.Target :: BasePart
 	if targetOldAnchor[1] ~= target then
+		if targetOldAnchor and targetOldAnchor[1] then
+			targetOldAnchor[1].Anchored = targetOldAnchor[2]
+			targetOldAnchor = {}
+		end
 		targetOldAnchor[1] = target
 		targetOldAnchor[2] = target.Anchored
-		targetOldAnchor[3] = target.CFrame
 	end
 
 	target.Anchored = if self.Extrusion ~= 0 then false else targetOldAnchor[2]
-	local newCFrame = target.CFrame
-		+ workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Extrusion ~= 0 then 1 else 0)
-	targetOldAnchor[3] *= CFrame.fromEulerAnglesXYZ(
+
+	target.AssemblyLinearVelocity = Vector3.new(0, target.AssemblyLinearVelocity.Y, 0)
+	target.CFrame += workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Extrusion ~= 0
+		then 1
+		else 0)
+	target.CFrame *= CFrame.fromEulerAnglesXYZ(
 		0,
 		math.rad(delta * 30 * self.Intrusion * (if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then -1 else 1)),
 		0
 	)
-	target.CFrame = CFrame.new(newCFrame.X, newCFrame.Y, newCFrame.Z)
-		* (targetOldAnchor[3] - targetOldAnchor[3].Position)
+	local _, y = target.CFrame:ToEulerAnglesXYZ()
+	target.CFrame = CFrame.new(target.CFrame.X, target.CFrame.Y, target.CFrame.Z) * CFrame.fromEulerAnglesXYZ(0, y, 0)
 end
 
 function Phys:UnloadTarget(target: BasePart)
@@ -175,15 +185,16 @@ local function Phys_m_ObjectInArea(mat: CFrame, object: BasePart)
 	end
 
 	local vec = object.Position - mat.Position
-	local dot = vec.Unit:Dot(mat.LookVector.Unit)
+	local dot = mat.LookVector.Unit:Dot(vec.Unit)
 
-	if not (dot > VIEW_CHECK) then
+	if dot < VIEW_CHECK then
 		return false
 	end
 
-	return true, dot
+	return true, dot, vec.Magnitude
 end
 
+local old = nil
 function Phys:FindObject(tag)
 	tag = tag or EXTRUSION_SIZE_TAG
 	local playerCharacter = LocalPlayer.Character
@@ -199,24 +210,32 @@ function Phys:FindObject(tag)
 	local result = workspace:Raycast(mat.Position, mat.LookVector * DISTANCE_CHECK, params)
 
 	if result and CollectionService:HasTag(result.Instance, tag) then
+		old = result.Instance
 		return result.Instance
 	end
 
 	local greatest = nil
-	local highest = -math.huge
+	local highest = math.huge
 	mat = playerCharacter.PrimaryPart.CFrame
 		* (workspace.CurrentCamera.CFrame :: CFrame & { Rotation: CFrame }).Rotation
 
 	local partsInRadius = workspace:GetPartBoundsInRadius(mat.Position, DISTANCE_CHECK)
 
+	if self.Extrusion ~= 0 or self.Intrusion ~= 0 then
+		if table.find(partsInRadius, old) then
+			return old
+		end
+	end
+
 	for _, object in pairs(partsInRadius) do
-		local valid, dot = Phys_m_ObjectInArea(mat, object)
-		if CollectionService:HasTag(object, tag) and valid and highest < dot then
-			highest = dot
+		local valid, dot, distance = Phys_m_ObjectInArea(mat, object)
+		if CollectionService:HasTag(object, tag) and valid and highest > distance then
+			highest = distance
 			greatest = object
 		end
 	end
 
+	old = greatest
 	return greatest
 end
 
