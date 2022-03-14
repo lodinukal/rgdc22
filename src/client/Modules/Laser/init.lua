@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PartCache = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("PartCache"))
 local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
+local RDL = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("RDL"))
 
 local MIRROR_TAG = "wp_mirror"
 local SOURCE_TAG = "wp_lasersource"
@@ -30,6 +31,7 @@ LaserModule.ActiveLasers = {}
 LaserModule.Receivers = {}
 
 LaserModule.ReceiverIded = {}
+LaserModule.Powered = {}
 LaserModule.f_recievers = Fusion.Value(LaserModule.ReceiverIded)
 
 local beamTemplate
@@ -44,6 +46,7 @@ do
 
 	beamTemplate.Material = Enum.Material.Neon
 	beamTemplate.Transparency = 0.2
+	beamTemplate.Color = Color3.new(0.913725, 0.670588, 0.007843)
 
 	-- part.CFrame = CFrame.lookAt(origin + direction/2 , origin)
 	-- part.Size = Vector3.new(self.Radius, self.Radius, direction.Magnitude)
@@ -70,7 +73,36 @@ do
 	beamTemplate.Parent = workspace
 end
 
-LaserModule.LaserCache = PartCache.new(beamTemplate, 1, workspace)
+LaserModule.LaserCache = {}
+do
+	local self = LaserModule.LaserCache
+	self.Stored = {}
+	self.Count = 0
+	self.Using = 0
+
+	local CF_REALLY_FAR_AWAY = CFrame.new(0, 10e8, 0)
+
+	function self:GetPart()
+		if (self.Using + 1) >= self.Count then
+			for i = 1, 10, 1 do
+				local clone = beamTemplate:Clone()
+				clone.Parent = workspace
+				clone.CFrame = CF_REALLY_FAR_AWAY
+				self.Stored[self.Count + i] = clone
+			end
+			self.Count += 10
+		end
+		local obj = self.Stored[self.Count - self.Using]
+		self.Using += 1
+		return obj
+	end
+
+	function self:ReturnPart(obj)
+		self.Using -= 1
+		obj.CFrame = CF_REALLY_FAR_AWAY
+		self.Stored[self.Count - self.Using] = obj
+	end
+end
 
 local function reflect(lv, nv)
 	return lv - 2 * nv * (lv:Dot(nv))
@@ -128,12 +160,22 @@ end
 
 function LaserModule:DoLaserSim(source: BasePart)
 	local direction = source.CFrame.LookVector * self.Distance
+
+	local offset = source:GetAttribute("offset")
 	local origin = source.Position
+	if offset then
+		origin += offset
+	end
 	local part = source
 
 	for _ = 1, self.ReflectLimit do
 		local raycastParams = RaycastParams.new()
-		raycastParams.FilterDescendantsInstances = { self.ActiveLasers, self.CachedSources } :: Array<Instance>
+		raycastParams.FilterDescendantsInstances = {
+			self.ActiveLasers,
+			self.CachedSources,
+			source,
+			Player.Character,
+		} :: Array<Instance>
 		raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
 		local result = workspace:Raycast(origin, direction, raycastParams)
@@ -146,8 +188,16 @@ function LaserModule:DoLaserSim(source: BasePart)
 
 		if not self:IsMirror(object) then
 			if self:IsReceiver(object) then
-				self.Receivers[object] = true
 				local id = object:GetAttribute("Id") or object.Name
+
+				if self.Powered[id] then
+					for i, signal in pairs(self.Powered[id]) do
+						signal:Fire()
+						self.Powered[id][i] = nil
+					end
+				end
+
+				self.Receivers[object] = true
 				self.ReceiverIded[id] = true
 			end
 			return
@@ -219,15 +269,23 @@ function LaserModule:Start()
 		self.ReceiverIded = {}
 
 		for source, _ in pairs(self.CachedSources) do
+			if not workspace:IsAncestorOf(source) then
+				continue
+			end
 			self:DoLaserSim(source)
 		end
-
-		LaserModule.f_recievers:set(self.ReceiverIded)
 	end)
 end
 
 function LaserModule:Received(id: string)
 	return self.ReceiverIded[id] ~= nil
+end
+
+function LaserModule:GetPowerSignal(id: string)
+	self.Powered[id] = self.Powered[id] or {}
+	local signal = RDL.Signal.new()
+	table.insert(self.Powered[id], signal)
+	return signal
 end
 
 LaserModule:Start()

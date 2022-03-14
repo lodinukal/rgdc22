@@ -39,7 +39,7 @@ local LevelModules = {
 
 local LevelOrder = {
 	"Level 1",
-	"Level 2"
+	"Level 2",
 }
 
 local LevelModule = {}
@@ -98,7 +98,7 @@ function LevelModule:LoadLevel(levelName)
 
 		task.spawn(function()
 			for _, set in ipairs(lightsFolderChildren) do
-				task.wait(1)
+				task.wait(0.5)
 
 				local clonedLightOn = LightOn:Clone() :: Sound
 				clonedLightOn:Play()
@@ -130,11 +130,40 @@ function LevelModule:LoadLevel(levelName)
 
 	local exit = clonedLevelFolder:FindFirstChild("exit")
 	if exit then
-		local zone = ZonePlus.new(exit)
-		local hrp = Player.Character:WaitForChild("HumanoidRootPart")
-		zone:onItemEnter(hrp, function()
+		-- local zone = ZonePlus.new(exit)
+		-- local hrp = Player.Character:WaitForChild("HumanoidRootPart")
+		-- zone:onItemEnter(hrp, function()
+		-- 	local canProceed = levelModule.CanProceed()
+		-- 	if not canProceed then
+		-- 		return
+		-- 	end
+
+		-- 	local currentIndex = table.find(LevelOrder, levelName)
+		-- 	local nextIndex = currentIndex + 1
+
+		-- 	local nextLevelName = LevelOrder[nextIndex]
+
+		-- 	if not nextLevelName then
+		-- 		return
+		-- 	end
+
+		-- 	self:UnloadLevel(clonedLevelFolder)
+		-- 	self:LoadLevel(nextLevelName)
+		-- end)
+
+		local proximityPrompt = Instance.new("ProximityPrompt")
+		proximityPrompt.Parent = exit
+		proximityPrompt.ActionText = "Continue"
+		proximityPrompt.ObjectText = exit:GetAttribute("altName") or "Exit"
+		proximityPrompt.KeyboardKeyCode = Enum.KeyCode.F
+		proximityPrompt.ClickablePrompt = true
+		proximityPrompt.HoldDuration = 1.3
+
+		local connection = nil
+		connection = proximityPrompt.TriggerEnded:Connect(function()
 			local canProceed = levelModule.CanProceed()
 			if not canProceed then
+				-- notify of objectives
 				return
 			end
 
@@ -143,6 +172,7 @@ function LevelModule:LoadLevel(levelName)
 
 			local nextLevelName = LevelOrder[nextIndex]
 
+			connection:Disconnect()
 			if not nextLevelName then
 				return
 			end

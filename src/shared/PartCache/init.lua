@@ -25,17 +25,17 @@ PartCacheStatic.__type = "PartCache" -- For compatibility with TypeMarshaller
 
 -- TYPE DEFINITION: Part Cache Instance
 export type PartCache = {
-	Open: {[number]: BasePart},
-	InUse: {[number]: BasePart},
+	Open: { [number]: BasePart },
+	InUse: { [number]: BasePart },
 	CurrentCacheParent: Instance,
 	Template: BasePart,
 	ExpansionSize: number,
 
-    GetPart: (self: PartCache) -> Instance,
-    ReturnPart: (self: PartCache, part: Instance) -> nil,
-    SetCacheParent: (self: PartCache, parent: Instance) -> nil,
-    Expand: (self: PartCache, numParts: number) -> nil,
-    Dispose: (self: PartCache) -> nil
+	GetPart: (self: PartCache) -> Instance,
+	ReturnPart: (self: PartCache, part: Instance) -> nil,
+	SetCacheParent: (self: PartCache, parent: Instance) -> nil,
+	Expand: (self: PartCache, numParts: number) -> nil,
+	Dispose: (self: PartCache) -> nil,
 }
 
 -----------------------------------------------------------
@@ -46,7 +46,8 @@ export type PartCache = {
 local CF_REALLY_FAR_AWAY = CFrame.new(0, 10e8, 0)
 
 -- Format params: methodName, ctorName
-local ERR_NOT_INSTANCE = "Cannot statically invoke method '%s' - It is an instance method. Call it on an instance of this class created via %s"
+local ERR_NOT_INSTANCE =
+	"Cannot statically invoke method '%s' - It is an instance method. Call it on an instance of this class created via %s"
 
 -- Format params: paramName, expectedType, actualType
 local ERR_INVALID_TYPE = "Invalid type for parameter '%s' (Expected %s, got %s)"
@@ -79,9 +80,15 @@ function PartCacheStatic.new(template: BasePart, numPrecreatedParts: number?, cu
 
 	--PrecreatedParts value.
 	--Same thing. Ensure it's a number, ensure it's not negative, warn if it's really huge or 0.
-	assert(numPrecreatedParts > 0, "PrecreatedParts can not be negative!")
-	assertwarn(numPrecreatedParts ~= 0, "PrecreatedParts is 0! This may have adverse effects when initially using the cache.")
-	assertwarn(template.Archivable, "The template's Archivable property has been set to false, which prevents it from being cloned. It will temporarily be set to true.")
+	assert(newNumPrecreatedParts > 0, "PrecreatedParts can not be negative!")
+	assertwarn(
+		numPrecreatedParts ~= 0,
+		"PrecreatedParts is 0! This may have adverse effects when initially using the cache."
+	)
+	assertwarn(
+		template.Archivable,
+		"The template's Archivable property has been set to false, which prevents it from being cloned. It will temporarily be set to true."
+	)
 
 	local oldArchivable = template.Archivable
 	template.Archivable = true
@@ -96,7 +103,7 @@ function PartCacheStatic.new(template: BasePart, numPrecreatedParts: number?, cu
 		InUse = {},
 		CurrentCacheParent = newCurrentCacheParent,
 		Template = template,
-		ExpansionSize = 10
+		ExpansionSize = 10,
 	}
 	setmetatable(object, PartCacheStatic)
 
@@ -115,7 +122,13 @@ function PartCacheStatic:GetPart(): BasePart
 	assert(getmetatable(self) == PartCacheStatic, ERR_NOT_INSTANCE:format("GetPart", "PartCache.new"))
 
 	if #self.Open == 0 then
-		warn("No parts available in the cache! Creating [" .. self.ExpansionSize .. "] new part instance(s) - this amount can be edited by changing the ExpansionSize property of the PartCache instance... (This cache now contains a grand total of " .. tostring(#self.Open + #self.InUse + self.ExpansionSize) .. " parts.)")
+		warn(
+			"No parts available in the cache! Creating ["
+				.. self.ExpansionSize
+				.. "] new part instance(s) - this amount can be edited by changing the ExpansionSize property of the PartCache instance... (This cache now contains a grand total of "
+				.. tostring(#self.Open + #self.InUse + self.ExpansionSize)
+				.. " parts.)"
+		)
 		for i = 1, self.ExpansionSize, 1 do
 			table.insert(self.Open, MakeFromTemplate(self.Template, self.CurrentCacheParent))
 		end
@@ -137,14 +150,23 @@ function PartCacheStatic:ReturnPart(part: BasePart)
 		part.CFrame = CF_REALLY_FAR_AWAY
 		part.Anchored = true
 	else
-		error("Attempted to return part \"" .. part.Name .. "\" (" .. part:GetFullName() .. ") to the cache, but it's not in-use! Did you call this on the wrong part?")
+		error(
+			'Attempted to return part "'
+				.. part.Name
+				.. '" ('
+				.. part:GetFullName()
+				.. ") to the cache, but it's not in-use! Did you call this on the wrong part?"
+		)
 	end
 end
 
 -- Sets the parent of all cached parts.
 function PartCacheStatic:SetCacheParent(newParent: Instance)
 	assert(getmetatable(self) == PartCacheStatic, ERR_NOT_INSTANCE:format("SetCacheParent", "PartCache.new"))
-	assert(newParent:IsDescendantOf(workspace) or newParent == workspace, "Cache parent is not a descendant of Workspace! Parts should be kept where they will remain in the visible world.")
+	assert(
+		newParent:IsDescendantOf(workspace) or newParent == workspace,
+		"Cache parent is not a descendant of Workspace! Parts should be kept where they will remain in the visible world."
+	)
 
 	self.CurrentCacheParent = newParent
 	for i = 1, #self.Open do

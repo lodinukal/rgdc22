@@ -58,9 +58,16 @@ function Phys:Start()
 			self:LoadTarget(object)
 		end)
 
-	ContextActionService:BindActionAtPriority(PUSH_PULL_BINDING, function(...)
-		self:ProcessPushPull(...)
-	end, false, Enum.ContextActionPriority.High.Value + 999, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
+	ContextActionService:BindActionAtPriority(
+		PUSH_PULL_BINDING,
+		function(...)
+			self:ProcessPushPull(...)
+		end,
+		false,
+		Enum.ContextActionPriority.High.Value + 999,
+		Enum.UserInputType.MouseButton1,
+		Enum.UserInputType.MouseButton2
+	)
 end
 
 function Phys:ProcessPushPull(actionName, inputState, inputObject)
@@ -99,17 +106,32 @@ function Phys:TargetSetPushPull(delta: number)
 	cache.delta = math.clamp(cache.delta + dir * delta * MORPH_SPEED, 1, cache.limit or 5)
 end
 
+local targetOldAnchor = {}
 function Phys:DoShove(delta)
 	if not self.Target then
 		Time:SetTimeScale(1)
 		return
 	end
 
-	Time:SetTimeScale(if self.Extrusion ~= 0 then 0.1 else 1)
+	Time:SetTimeScale(if self.Extrusion ~= 0 or self.Intrusion ~= 0 then 0.1 else 1)
 
 	local target = self.Target :: BasePart
-	target.Anchored = not self.Extrusion
-	target.CFrame += workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Extrusion ~= 0 then 1 else 0)
+	if targetOldAnchor[1] ~= target then
+		targetOldAnchor[1] = target
+		targetOldAnchor[2] = target.Anchored
+		targetOldAnchor[3] = target.CFrame
+	end
+
+	target.Anchored = if self.Extrusion ~= 0 then false else targetOldAnchor[2]
+	local newCFrame = target.CFrame
+		+ workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Extrusion ~= 0 then 1 else 0)
+	targetOldAnchor[3] *= CFrame.fromEulerAnglesXYZ(
+		0,
+		math.rad(delta * 30 * self.Intrusion * (if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then -1 else 1)),
+		0
+	)
+	target.CFrame = CFrame.new(newCFrame.X, newCFrame.Y, newCFrame.Z)
+		* (targetOldAnchor[3] - targetOldAnchor[3].Position)
 end
 
 function Phys:UnloadTarget(target: BasePart)
