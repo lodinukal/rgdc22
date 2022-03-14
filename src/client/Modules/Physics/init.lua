@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
+local SoundService = game:GetService("SoundService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
@@ -31,6 +32,8 @@ local Phys = {
 	Extrusion = 0,
 	Intrusion = 0,
 }
+
+local weldEffect = SoundService:WaitForChild("Welding") :: Sound
 
 function Phys:Start()
 	self.connection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -100,7 +103,16 @@ function Phys:TargetSetPushPull(delta: number)
 		return
 	end
 
-	Time:SetTimeScale(if self.Extrusion ~= 0 or self.Intrusion ~= 0 then 0.1 else 1)
+	local active = self.Extrusion ~= 0 or self.Intrusion ~= 0
+
+	Time:SetTimeScale(if active then 0.1 else 1)
+
+	if active and not weldEffect.IsPlaying then
+		weldEffect:Play()
+	end
+	if not active and weldEffect.Playing then
+		weldEffect:Stop()
+	end
 
 	local cache = self.TrackedTargets[self.Target]
 	cache.delta = math.clamp(cache.delta + dir * delta * MORPH_SPEED, 1, cache.limit or 5)
@@ -117,7 +129,8 @@ function Phys:DoShove(delta)
 		return
 	end
 
-	Time:SetTimeScale(if self.Extrusion ~= 0 or self.Intrusion ~= 0 then 0.1 else 1)
+	local active = self.Extrusion ~= 0 or self.Intrusion ~= 0
+	Time:SetTimeScale(if active then 0.1 else 1)
 
 	local target = self.Target :: BasePart
 	if targetOldAnchor[1] ~= target then
@@ -140,8 +153,14 @@ function Phys:DoShove(delta)
 		math.rad(delta * 30 * self.Intrusion * (if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then -1 else 1)),
 		0
 	)
-	local _, y = target.CFrame:ToEulerAnglesXYZ()
-	target.CFrame = CFrame.new(target.CFrame.X, target.CFrame.Y, target.CFrame.Z) * CFrame.fromEulerAnglesXYZ(0, y, 0)
+	if target:GetAttribute("specialvert") and not target:FindFirstChildOfClass("BodyGyro") then
+		local bg = Instance.new("BodyGyro")
+		bg.Parent = target
+		bg.D = 0
+		bg.MaxTorque = Vector3.new(10000, 0, 10000)
+		bg.P = 999
+		bg.CFrame = CFrame.new()
+	end
 end
 
 function Phys:UnloadTarget(target: BasePart)

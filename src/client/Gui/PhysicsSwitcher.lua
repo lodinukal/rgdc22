@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContextActionService = game:GetService("ContextActionService")
+local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -13,6 +14,8 @@ local Value = Fusion.Value
 local OnEvent = Fusion.OnEvent
 
 local PhysicsModule = require(script.Parent.Parent.Modules:WaitForChild("Physics"))
+
+local buttonSound = SoundService:WaitForChild("ButtonSound") :: Sound
 
 local iconModeMapping = {
 	PushPull = "rbxassetid://9088481403",
@@ -50,6 +53,7 @@ local text = {
 local function NextMode()
 	PhysicsModule:ChangeTarget(nil :: BasePart)
 	PhysicsModule:SetMode(modeCycle[(PhysicsModule.f_mode :: any):get()])
+	buttonSound:Play()
 end
 
 local ACTION_NAME = "wp_physics_switch_action"

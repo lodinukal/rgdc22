@@ -1,4 +1,5 @@
 local StarterGui = game:GetService("StarterGui")
+local SoundService = game:GetService("SoundService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -17,8 +18,10 @@ local Client = PlayerScripts:WaitForChild("Client")
 local Gui = Client:WaitForChild("Gui")
 
 local LevelTransition = require(Gui:WaitForChild("LevelTransition"))
-
 local LaserModule = require(script.Parent.Laser)
+
+local levelUpMusic = SoundService:WaitForChild("LevelProgression") :: Sound
+local interactionFailedMusic = SoundService:WaitForChild("InteractionFailed") :: Sound
 
 local function LoadModuleWithDependenciesInjected(module: Instance)
 	local success, req = pcall(require, module)
@@ -173,7 +176,7 @@ function LevelModule:LoadLevel(levelName)
 		connection = proximityPrompt.TriggerEnded:Connect(function()
 			local canProceed = levelModule:CanProceed()
 			if not canProceed then
-				-- notify of objectives
+				interactionFailedMusic:Play()
 				return
 			end
 
@@ -186,6 +189,7 @@ function LevelModule:LoadLevel(levelName)
 			if not nextLevelName then
 				return
 			end
+			levelUpMusic:Play()
 
 			self:UnloadLevel(clonedLevelFolder)
 			self:LoadLevel(nextLevelName)

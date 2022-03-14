@@ -4,7 +4,6 @@ local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local PartCache = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("PartCache"))
 local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
 local RDL = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("RDL"))
 

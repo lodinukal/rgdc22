@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContextActionService = game:GetService("ContextActionService")
+local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -12,6 +13,11 @@ local Tween = Fusion.Tween
 local Value = Fusion.Value
 
 local levelHint = Value(false)
+local hintSound = SoundService:WaitForChild("Hint") :: Sound
+
+Fusion.Observer(levelHint):onChange(function()
+	hintSound:Play()
+end)
 
 ContextActionService:BindAction("Hint", function(actionName, state, inputObject)
 	if state ~= Enum.UserInputState.Begin then
@@ -134,7 +140,9 @@ local function LevelTransition(props)
 						TextColor3 = Color3.fromRGB(213, 213, 213),
 						TextSize = 40,
 						TextTransparency = levelHintTweened,
-						TextStrokeTransparency = levelHintTweened,
+						TextStrokeTransparency = Computed(function()
+							return levelHintTweened:get() + 0.3
+						end),
 						TextWrapped = true,
 						TextYAlignment = Enum.TextYAlignment.Bottom,
 						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
