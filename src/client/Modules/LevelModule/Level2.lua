@@ -20,7 +20,7 @@ local Enemies = {}
 
 local function OnLoaded(self, map)
 	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new()
+		local spider = Spider.new(v)
 		spider:init()
 	end
 end
