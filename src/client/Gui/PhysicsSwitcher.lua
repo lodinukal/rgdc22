@@ -24,7 +24,27 @@ local modeCycle = {
 	Shove = "PushPull",
 }
 
+local text = {
+	PushPull = {
+		{
+			Text = "Extrude",
+			Icon = ""
+		},
+		{
+			Text = "Intrude",
+			Icon = "",
+		}
+	},
+	Shove = {
+		{
+			Text = "Shove",
+			Icon = ""
+		}
+	}
+}
+
 local function NextMode()
+	PhysicsModule:ChangeTarget(nil :: BasePart)
 	PhysicsModule:SetMode(modeCycle[(PhysicsModule.f_mode :: any):get()])
 end
 
@@ -56,7 +76,7 @@ PhysicsSwitcher = New("ScreenGui")({
 
 			[Children] = {
 				New("ImageButton")({
-					Name = "Botton",
+					Name = "Button",
 					Image = "rbxassetid://9088290164",
 					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 					BackgroundTransparency = 1,
@@ -95,6 +115,117 @@ PhysicsSwitcher = New("ScreenGui")({
 							Size = UDim2.fromScale(0.9, 0.9),
 							ZIndex = 2,
 						}),
+
+						New "TextLabel" {
+							Name = "KeyboardPrompt",
+							Font = Enum.Font.Highway,
+							RichText = true,
+							Text = "E",
+							TextColor3 = Color3.fromRGB(213, 213, 213),
+							TextScaled = true,
+							TextSize = 14,
+							TextStrokeTransparency = 0,
+							TextWrapped = true,
+							AnchorPoint = Vector2.new(1, 0.2),
+							BackgroundTransparency = 1,
+							Position = UDim2.fromScale(1, 0),
+							Size = UDim2.fromOffset(33, 29),
+						},
+
+						New "Frame" {
+							Name = "1",
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							BackgroundTransparency = 1,
+							Position = UDim2.fromScale(1, -0.2),
+							Rotation = -10,
+							Size = UDim2.fromScale(2, 0.5),
+						  
+							[Children] = {
+							  New "TextLabel" {
+								Name = "TextLabel",
+								Font = Enum.Font.Highway,
+								Text = Computed(function()
+									return text[PhysicsModule.f_mode:get()][1].Text
+								end),
+								TextColor3 = Color3.fromRGB(255, 255, 255),
+								TextScaled = true,
+								TextSize = 14,
+								TextStrokeTransparency = 0,
+								TextWrapped = true,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = 1,
+								Position = UDim2.fromScale(0.7, 0.5),
+								Size = UDim2.fromScale(0.7, 0.7),
+							  },
+						  
+							  New "ImageLabel" {
+								Name = "ImageLabel",
+								Image = Computed(function()
+									local m = text[PhysicsModule.f_mode:get()][1]
+									return if m then text[PhysicsModule.f_mode:get()][1].Icon else ""
+								end),
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = Computed(function()
+									local m = text[PhysicsModule.f_mode:get()][1]
+									return if not not m then 0.9 else 1
+								end),
+								Position = UDim2.fromScale(0.15, 0.5),
+								Size = UDim2.fromScale(0.25, 0.25),
+								SizeConstraint = Enum.SizeConstraint.RelativeXX,
+							  },
+							}
+						  },
+
+						  New "Frame" {
+							Name = "2",
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							BackgroundTransparency = 1,
+							Position = UDim2.fromScale(1, 0.65),
+							Rotation = 8,
+							Size = UDim2.fromScale(2, 0.5),
+						  
+							[Children] = {
+							  New "TextLabel" {
+								Name = "TextLabel",
+								Font = Enum.Font.Highway,
+								Text = Computed(function()
+									local m = text[PhysicsModule.f_mode:get()][2]
+									return if m then text[PhysicsModule.f_mode:get()][2].Text else ""
+								end),
+								TextColor3 = Color3.fromRGB(255, 255, 255),
+								TextScaled = true,
+								TextSize = 14,
+								TextStrokeTransparency = 0,
+								TextWrapped = true,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = 1,
+								Position = UDim2.fromScale(0.7, 0.5),
+								Size = UDim2.fromScale(0.7, 0.7),
+							  },
+						  
+							  New "ImageLabel" {
+								Name = "ImageLabel",
+								Image = Computed(function()
+									local m = text[PhysicsModule.f_mode:get()][2]
+									return if m then text[PhysicsModule.f_mode:get()][2].Icon else ""
+								end),
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = Computed(function()
+									local m = text[PhysicsModule.f_mode:get()][2]
+									return if not not m then 0.9 else 1
+								end),
+								Position = UDim2.fromScale(0.15, 0.5),
+								Size = UDim2.fromScale(0.25, 0.25),
+								SizeConstraint = Enum.SizeConstraint.RelativeXX,
+							  },
+							}
+						  }
 					},
 
 					[OnEvent("Activated")] = NextMode,
