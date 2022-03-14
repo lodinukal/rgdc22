@@ -123,10 +123,17 @@ function LevelModule:LoadLevel(levelName)
 				return
 			end
 
-			self:UnloadLevel(clonedLevelFolder)
 			local currentIndex = table.find(LevelOrder, levelName)
 			local nextIndex = currentIndex + 1
-			self:LoadLevel(LevelOrder[nextIndex])
+
+			local nextLevelName = LevelOrder[nextIndex]
+
+			if not nextLevelName then
+				return
+			end
+
+			self:UnloadLevel(clonedLevelFolder)
+			self:LoadLevel(nextLevelName)
 		end)
 	end
 end
