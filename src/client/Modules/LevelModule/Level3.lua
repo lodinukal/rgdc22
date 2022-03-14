@@ -20,7 +20,7 @@ local connection = nil
 
 local function OnLoaded(self, map)
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
-		doorOpen = not not self.LaserModule.ReceiverIded["Level2Lights"]
+		doorOpen = not not self.LaserModule.ReceiverIded["Level3Door"]
 	end)
 end
 
