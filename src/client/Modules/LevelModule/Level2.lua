@@ -27,6 +27,9 @@ local function OnLoaded(self, map)
 
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
 		lightsOn = not not self.LaserModule.ReceiverIded["Level2Lights"]
+		map.LaserEnd.Attachment:GetChildren()[1].Color = if lightsOn
+			then Color3.fromRGB(68, 255, 43)
+			else Color3.fromRGB(255, 43, 43)
 		if lightsOn then
 			if cached == lightsOn then
 				return

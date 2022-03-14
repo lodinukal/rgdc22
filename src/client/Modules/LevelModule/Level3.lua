@@ -21,6 +21,9 @@ local connection = nil
 local function OnLoaded(self, map)
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
 		doorOpen = not not self.LaserModule.ReceiverIded["Level3Door"]
+		map.LaserEnd.Attachment:GetChildren()[1].Color = if doorOpen
+			then Color3.fromRGB(68, 255, 43)
+			else Color3.fromRGB(255, 43, 43)
 	end)
 end
 
