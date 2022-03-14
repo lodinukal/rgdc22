@@ -12,7 +12,6 @@ local EXTRUSION_SIZE_TAG = "wp_scaleable"
 local SHOVE_TAG = "wp_shoveable"
 
 local PUSH_PULL_BINDING = "wp_pushpull_tool"
-local SHOVE_BINDING = "wp_shove_tool"
 local DISTANCE_CHECK = 16
 local VIEW_CHECK = 0.7
 
@@ -31,8 +30,6 @@ local Phys = {
 	Mode = "PushPull",
 	Extrusion = 0,
 	Intrusion = 0,
-
-	Shoving = false,
 }
 
 function Phys:Start()
@@ -63,29 +60,16 @@ function Phys:Start()
 
 	ContextActionService:BindActionAtPriority(PUSH_PULL_BINDING, function(...)
 		self:ProcessPushPull(...)
-	end, false, Enum.ContextActionPriority.High.Value, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
-
-	ContextActionService:BindActionAtPriority(SHOVE_BINDING, function(...)
-		self:ProcessShove(...)
-	end, false, Enum.ContextActionPriority.High.Value, Enum.UserInputType.MouseButton3)
+	end, false, Enum.ContextActionPriority.High.Value + 999, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
 end
 
 function Phys:ProcessPushPull(actionName, inputState, inputObject)
 	inputObject = inputObject :: InputObject
 
-	print("E")
 	if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 		self.Extrusion = if inputState == Enum.UserInputState.Begin then 1 else 0
 	elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
 		self.Intrusion = if inputState == Enum.UserInputState.Begin then -1 else 0
-	end
-end
-
-function Phys:ProcessShove(actionName, inputState, inputObject)
-	inputObject = inputObject :: InputObject
-
-	if inputObject.UserInputType == Enum.UserInputType.MouseButton3 then
-		self.Shoving = inputState == Enum.UserInputState.Begin
 	end
 end
 
@@ -121,11 +105,11 @@ function Phys:DoShove(delta)
 		return
 	end
 
-	Time:SetTimeScale(if self.Shoving then 0.1 else 1)
+	Time:SetTimeScale(if self.Extrusion ~= 0 then 0.1 else 1)
 
 	local target = self.Target :: BasePart
-	target.Anchored = not self.Shoving
-	target.CFrame += workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Shoving then 1 else 0)
+	target.Anchored = not self.Extrusion
+	target.CFrame += workspace.CurrentCamera.CFrame.LookVector * SHOVE_SPEED * delta * (if self.Extrusion ~= 0 then 1 else 0)
 end
 
 function Phys:UnloadTarget(target: BasePart)
