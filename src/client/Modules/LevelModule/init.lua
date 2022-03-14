@@ -17,9 +17,24 @@ local Gui = Client:WaitForChild("Gui")
 
 local LevelTransition = require(Gui:WaitForChild("LevelTransition"))
 
+local LaserModule = require(script.Parent.Laser)
+
+local function LoadModuleWithDependenciesInjected(module: Instance)
+	local success, req = pcall(require, module)
+	if not success then
+		warn(module.Name, "could not be required")
+		return false
+	end
+	if typeof(req) == "table" then
+		req.LaserModule = LaserModule
+	end
+
+	return req
+end
+
 local LevelModules = {
-	["Level 1"] = require(script:WaitForChild("Level1")),
-	["Level 2"] = require(script:WaitForChild("Level2")),
+	["Level 1"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level1")),
+	["Level 2"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level2")),
 }
 
 local LevelOrder = {
