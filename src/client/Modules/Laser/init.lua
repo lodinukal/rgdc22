@@ -5,6 +5,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PartCache = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("PartCache"))
+local Fusion = require(ReplicatedStorage:WaitForChild("Common"):WaitForChild("fusion"))
 
 local MIRROR_TAG = "wp_mirror"
 local SOURCE_TAG = "wp_lasersource"
@@ -27,6 +28,9 @@ LaserModule.CachedMirrors = {}
 LaserModule.CachedSources = {}
 LaserModule.ActiveLasers = {}
 LaserModule.Receivers = {}
+
+LaserModule.ReceiverIded = {}
+LaserModule.f_recievers = Fusion.Value(LaserModule.ReceiverIded)
 
 local beamTemplate
 do
@@ -135,7 +139,7 @@ function LaserModule:DoLaserSim(source: BasePart)
 		local result = workspace:Raycast(origin, direction, raycastParams)
 		local laser = self:ShowBeam(origin, result and result.Position - origin or direction)
 
-		local object = result.Instance
+		local object = result and result.Instance
 		if not result or not result.Instance then
 			return
 		end
@@ -143,6 +147,8 @@ function LaserModule:DoLaserSim(source: BasePart)
 		if not self:IsMirror(object) then
 			if self:IsReceiver(object) then
 				self.Receivers[object] = true
+				local id = object:GetAttribute("Id") or object.Name
+				self.ReceiverIded[id] = true
 			end
 			return
 		end
@@ -174,29 +180,17 @@ function LaserModule:Start()
 		self.CachedSources[source] = nil
 	end)
 
-	for _, receiver in ipairs(CollectionService:GetTagged(RECEIVER_TAG)) do
-		self.Receivers[receiver] = false
-	end
-	CollectionService:GetInstanceAddedSignal(RECEIVER_TAG):Connect(function(receiver: Instance)
-		self.Receivers[receiver] = false
-	end)
-	CollectionService:GetInstanceRemovedSignal(RECEIVER_TAG):Connect(function(receiver: Instance)
-		self.Receivers[receiver] = nil
-	end)
-
 	local arcHandles
 	ContextActionService:BindAction("SelectMirror", function(actionName, inputState, inputObject)
 		if inputState == Enum.UserInputState.Begin then
 			local target = Mouse.Target
 
 			if not self:IsMirror(target) then
-				print("Not mirror")
 				return
 			end
 
 			if arcHandles then
 				arcHandles:Destroy()
-
 				if arcHandles.Adornee == target then
 					arcHandles = nil
 					return
@@ -221,15 +215,21 @@ function LaserModule:Start()
 	RunService.Heartbeat:Connect(function(deltaTime)
 		self:Clear()
 
-		for key, _ in pairs(self.Receivers) do
-			self.Receivers[key] = false
-		end
+		self.Receivers = {}
+		self.ReceiverIded = {}
 
 		for source, _ in pairs(self.CachedSources) do
 			self:DoLaserSim(source)
 		end
+
+		LaserModule.f_recievers:set(self.ReceiverIded)
 	end)
 end
+
+function LaserModule:Received(id: string)
+	return self.ReceiverIded[id] ~= nil
+end
+
 LaserModule:Start()
 
 return LaserModule

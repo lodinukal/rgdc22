@@ -21,6 +21,7 @@ local PhysicsModule = require(Modules:WaitForChild("Physics"))
 PhysicsModule:Start()
 local FirstPersonModule = require(Modules:WaitForChild("FirstPersonModule"))
 FirstPersonModule:Start()
+local Laser = require(Modules:WaitForChild("Laser"))
 
 local Time = require(Modules:WaitForChild("Time"))
 local Modality = require(Modules:WaitForChild("Modality"))

@@ -61,18 +61,19 @@ function Phys:Start()
 			self:LoadTarget(object)
 		end)
 
-	ContextActionService:BindAction(PUSH_PULL_BINDING, function(...)
+	ContextActionService:BindActionAtPriority(PUSH_PULL_BINDING, function(...)
 		self:ProcessPushPull(...)
-	end, false, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
+	end, false, Enum.ContextActionPriority.High.Value, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2)
 
-	ContextActionService:BindAction(SHOVE_BINDING, function(...)
+	ContextActionService:BindActionAtPriority(SHOVE_BINDING, function(...)
 		self:ProcessShove(...)
-	end, false, Enum.UserInputType.MouseButton3)
+	end, false, Enum.ContextActionPriority.High.Value, Enum.UserInputType.MouseButton3)
 end
 
 function Phys:ProcessPushPull(actionName, inputState, inputObject)
 	inputObject = inputObject :: InputObject
 
+	print("E")
 	if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
 		self.Extrusion = if inputState == Enum.UserInputState.Begin then 1 else 0
 	elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
