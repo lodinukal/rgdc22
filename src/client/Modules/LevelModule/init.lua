@@ -62,7 +62,6 @@ function LevelModule:Start()
 	self.Gui = LevelTransition({
 		LevelledUp = self.LevelledUp,
 	})
-	self.CurrentLevelName = LevelOrder[1]
 
 	local function CharacterAdded(character)
 		local currentLevelFolder = self.CurrentLevelFolder
@@ -73,7 +72,7 @@ function LevelModule:Start()
 		if not character.PrimaryPart then
 			character:GetPropertyChangedSignal("PrimaryPart"):Wait()
 		end
-		self:LoadLevel(self.CurrentLevelName)
+		self:LoadLevel(self.CurrentLevelName or LevelOrder[1])
 	end
 
 	Player.CharacterAdded:Connect(CharacterAdded)
@@ -85,6 +84,7 @@ function LevelModule:Start()
 end
 
 function LevelModule:LoadLevel(levelName)
+	self.CurrentLevelName = levelName
 	local levelModule = LevelModules[levelName]
 	if not levelModule then
 		return
