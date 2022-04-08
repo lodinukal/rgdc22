@@ -13,21 +13,14 @@ local Modules = Client:WaitForChild("Modules")
 local Spider = require(Modules:WaitForChild("Spider"))
 
 local Data = {
-	Folder = Levels:WaitForChild("Level2"),
+	Folder = Levels:WaitForChild("Level5"),
 }
 
 local Enemies = {}
 
-local function OnLoaded(self, map)
-	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new(v)
-		spider:init()
-	end
-end
+local function OnLoaded(self, map) end
 
-local function OnUnloaded(self, map)
-	
-end
+local function OnUnloaded(self, map) end
 
 local function CanProceed()
 	return (#Enemies == 0)
@@ -37,5 +30,5 @@ return {
 	Data = Data,
 	OnLoaded = OnLoaded,
 	OnUnloaded = OnUnloaded,
-	CanProceed = CanProceed
+	CanProceed = CanProceed,
 }

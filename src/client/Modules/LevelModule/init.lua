@@ -44,15 +44,21 @@ local function LoadModuleWithDependenciesInjected(module: Instance)
 end
 
 local LevelModules = {
-	["Level 1"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level1")),
-	["Level 2"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level2")),
-	["Level 3"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level3")),
+	["End Hallway"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level1")),
+	["Medical Hub"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level2")),
+	["Starboard Command Center"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level3")),
+	["Starboard Lower Gate"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level4")),
+	["Reactor"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level5")),
+	["Reactor Chamber"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level6")),
 }
 
 local LevelOrder = {
-	"Level 1",
-	"Level 2",
-	"Level 3",
+	"End Hallway",
+	"Medical Hub",
+	"Starboard Command Center",
+	"Starboard Lower Gate",
+	"Reactor",
+	"Reactor Chamber",
 }
 
 local LevelModule = {}

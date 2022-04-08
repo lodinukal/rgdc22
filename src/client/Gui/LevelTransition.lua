@@ -27,9 +27,12 @@ ContextActionService:BindAction("Hint", function(actionName, state, inputObject)
 end, false, Enum.KeyCode.H)
 
 local levelHints = {
-	["Level 1"] = "Hint - Try extruding the pipe.",
-	["Level 2"] = "Hint - Try rotating the laser beam generator to face the receiver on the wall. To get rotate tool press E, and to reverse the rotation direction hold Left Shift while rotating.",
-	["Level 3"] = "Hint - The scaffolding is really bendy, and those barrels are reflective, so maybe we could unlock the door like that.",
+	["End Hallway"] = "Hint - Try extruding the pipe.",
+	["Medical Hub"] = "Hint - Try rotating the laser beam generator to face the receiver on the wall. To get rotate tool press E, and to reverse the rotation direction hold Left Shift while rotating.",
+	["Starboard Command Center"] = "Hint - The scaffolding is really bendy, and those barrels are reflective, so maybe we could unlock the door like that.",
+	["Starboard Lower Gate"] = "Hint - The laser beam generators can be put on scaffolding.",
+	["Reactor"] = "Hint - Fire bad, it will kill you almost instantly.",
+	["Reactor Chamber"] = "Hint - The previous security posted here locked the bridge well; but now we can't go through. You may be able to rummage through the debris to get something useful.",
 }
 
 local function LevelTransition(props)

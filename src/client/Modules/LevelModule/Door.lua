@@ -6,7 +6,7 @@ local Common = ReplicatedStorage:WaitForChild("Common")
 
 local Fusion = require(Common:WaitForChild("fusion"))
 
-local DOOR_SPEED = 1 / 3
+local DOOR_SPEED = 1 / 7
 
 return function(props: { instance: BasePart, dependingState: Fusion.State<boolean> })
 	local instance = props.instance
@@ -19,7 +19,7 @@ return function(props: { instance: BasePart, dependingState: Fusion.State<boolea
 	end
 
 	local openPosition = instance.Position
-	local closedPosition = instance.Position + instance:GetAttribute("Offset") or Vector3.new(0, 5, 0)
+	local closedPosition = instance.Position + (instance:GetAttribute("Offset") or Vector3.new(0, 10, 0))
 
 	local info = TweenInfo.new((closedPosition - openPosition).Magnitude * DOOR_SPEED)
 	local positionComputed = Fusion.Computed(function()

@@ -24,6 +24,7 @@ FirstPersonModule:Start()
 local Laser = require(Modules:WaitForChild("Laser"))
 
 local Time = require(Modules:WaitForChild("Time"))
+local Traps = require(Modules:WaitForChild("Traps"))
 local Modality = require(Modules:WaitForChild("Modality"))
 Modality:Start()
 

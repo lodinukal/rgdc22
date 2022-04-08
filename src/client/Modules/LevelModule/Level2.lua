@@ -28,11 +28,11 @@ local tweenIndo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential)
 local function OnLoaded(self, map)
 	local lights = map._lights:GetChildren()
 
-	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new(v)
-		spider:init()
-		table.insert(spiders, spider)
-	end
+	-- for i, v in ipairs(map.enemies:GetChildren()) do
+	-- 	local spider = Spider.new(v)
+	-- 	spider:init()
+	-- 	table.insert(spiders, spider)
+	-- end
 
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
 		lightsOn = not not self.LaserModule.ReceiverIded["Level2Lights"]
