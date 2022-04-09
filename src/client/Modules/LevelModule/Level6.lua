@@ -14,6 +14,7 @@ local Modules = Client:WaitForChild("Modules")
 local Spider = require(Modules:WaitForChild("Spider"))
 
 local Door = require(script.Parent.Door)
+local LaserColourUtils = require(script.Parent.LaserColourUtils)
 local Fusion = require(ReplicatedStorage:WaitForChild("Common").fusion)
 
 local Data = {
@@ -21,7 +22,7 @@ local Data = {
 }
 
 local Enemies = {}
-local gateState = Fusion.Value(false)
+local jumpStart = Fusion.Value(false)
 local final = Fusion.Value(false)
 local connection = nil
 
@@ -40,17 +41,22 @@ local function OnLoaded(self, map)
 	})
 	Door({
 		instance = map:WaitForChild("Sec3"),
-		dependingState = gateState :: any,
+		dependingState = jumpStart :: any,
 	})
 	Door({
 		instance = map:WaitForChild("Sec4"),
-		dependingState = gateState :: any,
+		dependingState = jumpStart :: any,
 	})
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
-		(gateState :: any):set(not not self.LaserModule.ReceiverIded["Level6Jumpstart"])
-		map.LaserEnd.Attachment:GetChildren()[1].Color = if (gateState :: any):get()
-			then Color3.fromRGB(68, 255, 43)
-			else Color3.fromRGB(255, 43, 43)
+		if jumpStart:get() == false then
+			(jumpStart :: any):set(not not self.LaserModule.ReceiverIded["Level6Jump"])
+			-- TODO: Play Zap sound effect
+		else
+			(final :: any):set(not not self.LaserModule.ReceiverIded["Level6Unlock"])
+		end
+
+		LaserColourUtils:SetColouration(map.LaserEnd1, jumpStart)
+		LaserColourUtils:SetColouration(map.LaserEnd2, final)
 	end)
 end
 
@@ -62,8 +68,12 @@ local function OnUnloaded(self, map)
 end
 
 local function CanProceed(self)
-	if not (gateState :: any):get() then
-		self.Requirements("H-How did you get past the gate??.")
+	if not (final :: any):get() then
+		self.Requirements("Security gates are still locked.")
+		return false
+	end
+	if not (jumpStart :: any):get() then
+		self.Requirements("The reactor is still offline.")
 		return false
 	end
 	return true
