@@ -6,6 +6,7 @@ local Common = ReplicatedStorage:WaitForChild("Common")
 
 local Fusion = require(Common:WaitForChild("fusion"))
 
+local DOOR_SOUND = SoundService:WaitForChild("Gateway") :: Sound
 local DOOR_SPEED = 1 / 7
 
 return function(props: { instance: BasePart, dependingState: Fusion.State<boolean> })
@@ -24,6 +25,9 @@ return function(props: { instance: BasePart, dependingState: Fusion.State<boolea
 	local info = TweenInfo.new((closedPosition - openPosition).Magnitude * DOOR_SPEED)
 	local positionComputed = Fusion.Computed(function()
 		return if dependingState:get() == true then openPosition else closedPosition
+	end)
+	Fusion.Observer(dependingState):onChange(function()
+		DOOR_SOUND:Play()
 	end)
 	local tweened = Fusion.Tween(positionComputed :: any, info)
 	Fusion.Hydrate(instance)({

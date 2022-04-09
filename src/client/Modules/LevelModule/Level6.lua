@@ -1,4 +1,5 @@
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Levels = ReplicatedStorage:WaitForChild("Levels")
@@ -21,16 +22,24 @@ local Data = {
 	Folder = Levels:WaitForChild("Level6"),
 }
 
+local jumpstartSound = SoundService:WaitForChild("Jumpstart") :: Sound
+
 local Enemies = {}
 local jumpStart = Fusion.Value(false)
 local final = Fusion.Value(false)
 local connection = nil
+
+Fusion.Observer(jumpStart):onChange(function()
+	jumpstartSound:Play()
+end)
 
 local function OnLoaded(self, map)
 	-- for i, v in ipairs(map.enemies:GetChildren()) do
 	-- 	local spider = Spider.new(v)
 	-- 	spider:init()
 	-- end
+	jumpStart:set(false)
+	final:set(false)
 	Door({
 		instance = map:WaitForChild("Sec1"),
 		dependingState = final :: any,
@@ -50,7 +59,6 @@ local function OnLoaded(self, map)
 	connection = RunService.Heartbeat:Connect(function(deltaTime)
 		if jumpStart:get() == false then
 			(jumpStart :: any):set(not not self.LaserModule.ReceiverIded["Level6Jump"])
-			-- TODO: Play Zap sound effect
 		else
 			(final :: any):set(not not self.LaserModule.ReceiverIded["Level6Unlock"])
 		end
