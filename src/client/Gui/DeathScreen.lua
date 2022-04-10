@@ -10,9 +10,9 @@ local Children = Fusion.Children
 local Tween = Fusion.Tween
 
 local motivationalMessages = {
-    "Don't let your dreams be dreams",
-    "Good job, you need it",
-    "h"
+    "Don't let your dreams be dreams!",
+    "Good job, you need it!",
+    "Try using a hint!"
 }
 
 local function iterPageItems(pages)
@@ -34,23 +34,30 @@ end
 local friendPages = Players:GetFriendsAsync(Players.LocalPlayer.UserId)
 
 local usernames = {}
-for item, pageNo in iterPageItems(friendPages) do
-	table.insert(usernames, item.Username)
+for item, _ in iterPageItems(friendPages) do
+    table.insert(usernames, item.Username)
 end
 
 local function DeathScreen(props)
     local visible = Fusion.Value(false)
     local text = Fusion.Value("")
+    local transparencyComputed = Computed(function()
+        return if visible:get() then 0 else 1
+    end)
+    local tweenedTransparency = Tween(transparencyComputed, TweenInfo.new(0.3))
     local gui = New "ScreenGui" {
         IgnoreGuiInset = true,
         Parent = Players.LocalPlayer:WaitForChild("PlayerGui"),
+        ResetOnSpawn = false,
+        DisplayOrder = 9999,
         [Children] = {
             New "Frame" {
                 ZIndex = 0,
                 Size = UDim2.fromScale(1, 1),
                 BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                Transparency = tweenedTransparency,
                 Visible = Computed(function()
-                    return visible:get()
+                    return tweenedTransparency:get() <= 0.999
                 end),
                 [Children] = {
                     New "TextLabel" {
@@ -61,6 +68,7 @@ local function DeathScreen(props)
                             return text:get()
                         end),
                         Font = Enum.Font.Gotham,
+                        Transparency = tweenedTransparency,
                         TextSize = 20,
                         TextColor3 = Color3.fromRGB(0, 0, 0)
                     }
