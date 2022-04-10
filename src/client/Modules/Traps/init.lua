@@ -31,7 +31,11 @@ local function SetFireTrap(fireTrap: Model, bool: boolean)
 	FireTrapEnabled[fireTrap] = bool
 	local src = fireTrap:WaitForChild("Source")
 	for _, child in ipairs(src:GetChildren()) do
-		(child :: any).Enabled = bool
+		if child:IsA("Sound") then
+			child[if bool then "Play" else "Stop"](child)
+		else
+			(child :: any).Enabled = bool
+		end
 	end
 end
 

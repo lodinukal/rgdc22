@@ -12,22 +12,33 @@ local Modules = Client:WaitForChild("Modules")
 
 local Spider = require(Modules:WaitForChild("Spider"))
 
+local Door = require(script.Parent.Door)
+local LaserColourUtils = require(script.Parent.LaserColourUtils)
+local Fusion = require(ReplicatedStorage:WaitForChild("Common").fusion)
+
 local Data = {
-	Folder = Levels:WaitForChild("Level2"),
+	Folder = Levels:WaitForChild("Level7"),
 }
 
 local Enemies = {}
+local armouryUnlocked = Fusion.Value(false)
 
 local function OnLoaded(self, map)
-	for i, v in ipairs(map.enemies:GetChildren()) do
-		local spider = Spider.new(v)
-		spider:init()
-	end
+	Door {
+		instance = map:WaitForChild("Border1"),
+		dependingState = armouryUnlocked
+	}
+	Door {
+		instance = map:WaitForChild("Border2"),
+		dependingState = armouryUnlocked
+	}
+	Door {
+		instance = map:WaitForChild("Border3"),
+		dependingState = armouryUnlocked
+	}
 end
 
-local function OnUnloaded(self, map)
-	
-end
+local function OnUnloaded(self, map) end
 
 local function CanProceed()
 	return (#Enemies == 0)
@@ -37,5 +48,5 @@ return {
 	Data = Data,
 	OnLoaded = OnLoaded,
 	OnUnloaded = OnUnloaded,
-	CanProceed = CanProceed
+	CanProceed = CanProceed,
 }
