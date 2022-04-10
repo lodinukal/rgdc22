@@ -50,7 +50,7 @@ local LevelModules = {
 	["Starboard Lower Gate"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level4")),
 	["Reactor"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level5")),
 	["Reactor Chamber"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level6")),
-	["Bridge"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level7"))
+	["Bridge Foyer"] = LoadModuleWithDependenciesInjected(script:WaitForChild("Level7"))
 }
 
 local LevelOrder = {
@@ -60,7 +60,7 @@ local LevelOrder = {
 	-- "Starboard Lower Gate",
 	-- "Reactor",
 	-- "Reactor Chamber",
-	"Bridge"
+	"Bridge Foyer"
 }
 
 local LevelModule = {}

@@ -33,6 +33,7 @@ local levelHints = {
 	["Starboard Lower Gate"] = "Hint - The laser beam generators can be put on scaffolding.",
 	["Reactor"] = "Hint - Fire bad, it will kill you almost instantly.",
 	["Reactor Chamber"] = "Hint - The previous security posted here locked the bridge well; but now we can't go through. You may be able to rummage through the debris to get something useful.",
+	["Bridge Foyer"] = "Hint - Looks like someone has tried to get into the armoury to get mines to open the Bulkhead."
 }
 
 local function LevelTransition(props)

@@ -1,4 +1,5 @@
 local RunService = game:GetService("RunService")
+local ContentProvider = game:GetService("ContentProvider")
 local CollectionService = game:GetService("CollectionService")
 
 local EXPLOSIVE_TAG = "wp_explosive"
@@ -10,6 +11,14 @@ local EXPLOSION_TIME = 2
 
 local LaserModule = require(script.Parent.Laser)
 
+local explosionSound = Instance.new("Sound")
+explosionSound.PlayOnRemove = true
+explosionSound.SoundId = "rbxassetid://1840158697"
+
+ContentProvider:PreloadAsync({explosionSound}, function()
+    print("Explosions have loaded")
+end)
+
 local function GetTagFromId(tag)
     return "explosive_" .. tag
 end
@@ -19,22 +28,31 @@ local function DealDamageToBreakable(wall: BasePart)
     local maxHealth = wall:GetAttribute("MaxHealth") or 1
     health -= 1
     wall:SetAttribute("Health", health)
-    wall.Transparency = 0.4 + 0.6 * (health / maxHealth)
+    wall.Transparency = 0.1 * (health / maxHealth)
     if health <= 0 then
         wall:Destroy()
-        -- TODO: Add VFX for destruction
     end
 end
 
 local function Explode(explosive: BasePart)
     local explosion = Instance.new("Explosion")
-    explosion.BlastRadius = 8
+    explosion.BlastRadius = 9
     explosion.BlastPressure = 10
     explosion.DestroyJointRadiusPercent = 0
-    explosion.Position = explosive.Position + Vector3.new(0, 2, 0)
+    explosion.Position = explosive.Position
     explosion.Parent = workspace
 
+    local cache = {}
     explosion.Hit:Connect(function(part, distance)
+        local humanoid = part.Parent:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if cache[humanoid] then
+                return
+            end
+            cache[humanoid] = true
+            humanoid:TakeDamage(90 * (distance / explosion.BlastRadius))
+        end
+
         if CollectionService:HasTag(part, BREAK_TAG) then
             DealDamageToBreakable(part)
         end
@@ -51,6 +69,7 @@ local function ExplosiveAdded(explosive: BasePart)
     if not explosiveId then
         return
     end
+    explosionSound:Clone().Parent = explosive
     local mesh = explosive:FindFirstChildOfClass("SpecialMesh")
     ExplosiveTracking[explosiveId] = 0
     local tagged = GetTagFromId(explosiveId)

@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Levels = ReplicatedStorage:WaitForChild("Levels")
@@ -23,6 +24,8 @@ local Data = {
 local Enemies = {}
 local armouryUnlocked = Fusion.Value(false)
 
+local connection
+
 local function OnLoaded(self, map)
 	Door {
 		instance = map:WaitForChild("Border1"),
@@ -36,12 +39,23 @@ local function OnLoaded(self, map)
 		instance = map:WaitForChild("Border3"),
 		dependingState = armouryUnlocked
 	}
+	local laserEnd1 = map:WaitForChild("LaserEnd1")
+	connection = RunService.Heartbeat:Connect(function(deltaTime)
+		if armouryUnlocked:get() == false then
+			(armouryUnlocked :: any):set(not not self.LaserModule.ReceiverIded["Level7Armoury"])
+			LaserColourUtils:SetColouration(laserEnd1, armouryUnlocked)
+		end
+	end)
 end
 
-local function OnUnloaded(self, map) end
+local function OnUnloaded(self, map)
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
+end
 
 local function CanProceed()
-	return (#Enemies == 0)
 end
 
 return {

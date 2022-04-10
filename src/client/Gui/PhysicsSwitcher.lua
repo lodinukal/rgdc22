@@ -51,7 +51,6 @@ local text = {
 }
 
 local function NextMode()
-	PhysicsModule:ChangeTarget(nil :: BasePart)
 	PhysicsModule:SetMode(modeCycle[(PhysicsModule.f_mode :: any):get()])
 	buttonSound:Play()
 end

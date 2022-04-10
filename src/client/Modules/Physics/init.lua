@@ -19,6 +19,18 @@ local VIEW_CHECK = 0.1
 local MORPH_SPEED = 12
 local SHOVE_SPEED = 3
 
+local rotationSpeed = 10
+
+UserInputService.InputChanged:Connect(function(input, gameProcessedEvent)
+	-- if gameProcessedEvent then
+	-- 	return
+	-- end
+	if input.UserInputType == Enum.UserInputType.MouseWheel then
+		rotationSpeed = math.clamp(rotationSpeed + input.Position.Z, 0, 30)
+		print(rotationSpeed)
+	end
+end)
+
 local LocalPlayer = Players.LocalPlayer
 
 local Phys = {
@@ -67,7 +79,7 @@ function Phys:Start()
 			self:ProcessPushPull(...)
 		end,
 		false,
-		Enum.ContextActionPriority.High.Value + 999,
+		Enum.ContextActionPriority.Default.Value,
 		Enum.UserInputType.MouseButton1,
 		Enum.UserInputType.MouseButton2
 	)
@@ -103,6 +115,12 @@ function Phys:TargetSetPushPull(delta: number)
 		return
 	end
 
+	if not CollectionService:HasTag(self.Target, EXTRUSION_SIZE_TAG) then
+		Time:SetTimeScale(1)
+		self:ChangeTarget(nil);
+		return
+	end
+
 	local active = self.Extrusion ~= 0 or self.Intrusion ~= 0
 
 	Time:SetTimeScale(if active then 0.1 else 1)
@@ -129,6 +147,12 @@ function Phys:DoShove(delta)
 		return
 	end
 
+	if not CollectionService:HasTag(self.Target, SHOVE_TAG) then
+		Time:SetTimeScale(1)
+		self:ChangeTarget(nil);
+		return
+	end
+
 	local active = self.Extrusion ~= 0 or self.Intrusion ~= 0
 	Time:SetTimeScale(if active then 0.1 else 1)
 
@@ -150,7 +174,7 @@ function Phys:DoShove(delta)
 		else 0)
 	target.CFrame *= CFrame.fromEulerAnglesXYZ(
 		0,
-		math.rad(delta * 30 * self.Intrusion * (if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then -1 else 1)),
+		math.rad(delta * rotationSpeed * self.Intrusion * (if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then -1 else 1)),
 		0
 	)
 	if target:GetAttribute("specialvert") and not target:FindFirstChildOfClass("BodyGyro") then
