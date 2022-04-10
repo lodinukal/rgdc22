@@ -1,3 +1,5 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -10,13 +12,35 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
-local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
+local LevelModule = require(Modules:WaitForChild("LevelModule"))
+LevelModule:Start()
+-- DeathScreen
+do
+    local openEvent = Signal.new()
+    local closeEvent = Signal.new()
+
+    local function CharacterAdded(character)
+        closeEvent:Fire()
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.Died:Connect(function()
+            openEvent:Fire()
+        end)
+    end
+
+    LocalPlayer.CharacterAdded:Connect(CharacterAdded)
+    CharacterAdded(LocalPlayer.CharacterAdded:Wait())
+
+    local DeathScreen = require(Gui:WaitForChild("DeathScreen"))
+    DeathScreen {
+        EventOpen = openEvent,
+        EventClose = closeEvent
+    }
+    
+end
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
 
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
-local LevelModule = require(Modules:WaitForChild("LevelModule"))
-LevelModule:Start()
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
 PhysicsModule:Start()
 local FirstPersonModule = require(Modules:WaitForChild("FirstPersonModule"))
