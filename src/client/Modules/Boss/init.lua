@@ -1,7 +1,9 @@
 local RunService = game:GetService("RunService")
 local BattleFolder = workspace:WaitForChild("Boss")
-local BossMeshpart = BattleFolder:WaitForChild("Invader")
+local Invader = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
+local Projectile = BattleFolder:WaitForChild("Projectile")
+local ShootPart = Invader:WaitForChild("ShootPart")
 
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
 
@@ -21,11 +23,12 @@ end
 
 -- Loop
 local function StartBossAnimation()
+    local amplitude = 60
     local elapsed = 0
-    local originalCFrame = BossMeshpart.CFrame
+    local originalCFrame = Invader.PrimaryPart.CFrame
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
-        BossMeshpart.CFrame = originalCFrame + Vector3.new(math.cos(elapsed/2) * 4, math.sin(elapsed) * 4, 0)
+        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(math.cos(elapsed/2) * 2, math.sin(elapsed/2) * amplitude, 0))
     end)
 end
 
@@ -52,6 +55,14 @@ local function Cleanup()
     RenderStepCleanup()
 end
 
+local function Fire()
+    local newProjectile = Projectile:Clone()
+    newProjectile.CFrame = ShootPart.CFrame
+    newProjectile.Anchored = false
+    newProjectile.Parent = BattleFolder
+    newProjectile:ApplyImpulse(ShootPart.Position + ShootPart.LookVector * 100)
+end
+
 local function Begin(self)
     if Started then
         Cleanup()
@@ -67,6 +78,10 @@ local function Begin(self)
 	Dialogue.event:Fire("Space Invader", {
 		"P|R|E|P|A|R|E| T|O| P|E|R|I|S|H.",
 	})
+
+    while task.wait(math.random(3, 6)) do
+        Fire()
+    end
 end
 
 return {
