@@ -1,9 +1,12 @@
+local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local BattleFolder = workspace:WaitForChild("Boss")
 local BossMeshpart = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
 
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
+
+local BossRoar = SoundService:WaitForChild("Roar")
 
 local Cache = {}
 local Started = false
@@ -25,7 +28,7 @@ local function StartBossAnimation()
     local originalCFrame = BossMeshpart.CFrame
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
-        BossMeshpart.CFrame = originalCFrame + Vector3.new(math.cos(elapsed/2) * 4, math.sin(elapsed) * 4, 0)
+        BossMeshpart.CFrame = originalCFrame + Vector3.new(math.cos(elapsed/4) * 4, math.sin(elapsed/2) * 4, 0)
     end)
 end
 
@@ -52,6 +55,15 @@ local function Cleanup()
     RenderStepCleanup()
 end
 
+local function Energise()
+    BossRoar:Play()
+    for _, particle: Instance in ipairs(BossMeshpart:WaitForChild("FX"):GetChildren()) do
+        if particle:IsA("ParticleEmitter") then
+            (particle :: ParticleEmitter):Emit()
+        end
+    end
+end
+
 local function Begin(self)
     if Started then
         Cleanup()
@@ -67,6 +79,8 @@ local function Begin(self)
 	Dialogue.event:Fire("Space Invader", {
 		"P|R|E|P|A|R|E| T|O| P|E|R|I|S|H.",
 	})
+    task.wait(0.4)
+    Energise()
 end
 
 return {
