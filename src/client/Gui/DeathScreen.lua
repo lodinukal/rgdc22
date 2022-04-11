@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -31,11 +32,15 @@ local function iterPageItems(pages)
 	end)
 end
 
-local friendPages = Players:GetFriendsAsync(Players.LocalPlayer.UserId)
-
 local usernames = {}
-for item, _ in iterPageItems(friendPages) do
-    table.insert(usernames, item.Username)
+if not RunService:IsStudio() then
+    local friendPages = Players:GetFriendsAsync(Players.LocalPlayer.UserId)
+
+    for item, _ in iterPageItems(friendPages) do
+        table.insert(usernames, item.Username)
+    end
+else
+    usernames = {"liquid_snail", "whale", "oofblocks", "hex"}
 end
 
 local function DeathScreen(props)

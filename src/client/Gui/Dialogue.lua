@@ -26,7 +26,7 @@ local PAUSE_TIMES = {
 
 local sound = SoundService:WaitForChild("Speech") :: Sound
 
-local PROGRESS_TIME = 0.1
+local PROGRESS_TIME = 0.05
 local PIPE_PAUSE = 0.2
 local BETWEEN = 0.6
 local skipped = false
@@ -60,6 +60,7 @@ local function StartGraphemes(textState, out)
 end
 
 local newDialogue = RDL.Signal.new()
+local completed = RDL.Signal.new()
 
 function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
 
@@ -89,6 +90,7 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
         end
         task.wait(0.4)
         table.remove(bin, 1)
+        completed:Fire()
         blocking = false
     end)
 
@@ -192,5 +194,6 @@ d.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 return {
     Component = Dialogue,
     event = newDialogue,
-    enabled = enabled
+    enabled = enabled,
+    completed = completed
 }

@@ -20,7 +20,9 @@ local LaserColourUtils = require(script.Parent.LaserColourUtils)
 local Fusion = require(ReplicatedStorage:WaitForChild("Common").fusion)
 
 local Dialogue = require(script.Parent.Parent.Parent.Gui.Dialogue)
+local BossTransition = require(script.Parent.Parent.Parent.Gui.BossTransition)
 local FirstPerson = require(script.Parent.Parent.FirstPersonModule)
+local Boss = require(script.Parent.Parent.Boss)
 
 local Data = {
 	Folder = Levels:WaitForChild("Level8"),
@@ -47,6 +49,14 @@ local function OnLoaded(self, map)
 	TweenService:Create(workspace.CurrentCamera, swishTween, {
 		CFrame = CFrame.lookAt(character:WaitForChild("Head").Position, map:WaitForChild("invader").Position)
 	}):Play()
+	Dialogue.completed:Wait()
+	task.spawn(function()
+		BossTransition:set(true)
+		task.wait(1)
+		BossTransition:set(false)
+	end)
+	task.wait(1)
+	Boss.Begin()
 end
 
 local function OnUnloaded(self, map)
