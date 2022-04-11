@@ -58,9 +58,10 @@ local function Cleanup()
     RenderStepCleanup()
 end
 
+local bodyfx = Invader:WaitForChild("Body"):WaitForChild("FX")
 local function Energise()
     BossRoar:Play()
-    for _, particle: Instance in ipairs(Invader:WaitForChild("FX"):GetChildren()) do
+    for _, particle: Instance in ipairs(bodyfx:GetChildren()) do
         if particle:IsA("ParticleEmitter") then
             (particle :: ParticleEmitter):Emit()
         end
@@ -72,7 +73,7 @@ local function Fire()
     newProjectile.CFrame = ShootPart.CFrame
     newProjectile.Anchored = false
     newProjectile.Parent = BattleFolder
-    newProjectile:ApplyImpulse(ShootPart.Position + ShootPart.LookVector * 100)
+    newProjectile:ApplyImpulse(ShootPart.CFrame.LookVector * 100)
 end
 
 local function Begin(self)
