@@ -1,8 +1,10 @@
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local BattleFolder = workspace:WaitForChild("Boss")
-local BossMeshpart = BattleFolder:WaitForChild("Invader")
+local Invader = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
+local Projectile = BattleFolder:WaitForChild("Projectile")
+local ShootPart = Invader:WaitForChild("ShootPart")
 
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
 
@@ -24,11 +26,12 @@ end
 
 -- Loop
 local function StartBossAnimation()
+    local amplitude = 60
     local elapsed = 0
-    local originalCFrame = BossMeshpart.CFrame
+    local originalCFrame = Invader.PrimaryPart.CFrame
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
-        BossMeshpart.CFrame = originalCFrame + Vector3.new(math.cos(elapsed/4) * 4, math.sin(elapsed/2) * 4, 0)
+        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(math.cos(elapsed/2) * 2, math.sin(elapsed/2) * amplitude, 0))
     end)
 end
 
@@ -57,11 +60,19 @@ end
 
 local function Energise()
     BossRoar:Play()
-    for _, particle: Instance in ipairs(BossMeshpart:WaitForChild("FX"):GetChildren()) do
+    for _, particle: Instance in ipairs(Invader:WaitForChild("FX"):GetChildren()) do
         if particle:IsA("ParticleEmitter") then
             (particle :: ParticleEmitter):Emit()
         end
     end
+end
+
+local function Fire()
+    local newProjectile = Projectile:Clone()
+    newProjectile.CFrame = ShootPart.CFrame
+    newProjectile.Anchored = false
+    newProjectile.Parent = BattleFolder
+    newProjectile:ApplyImpulse(ShootPart.Position + ShootPart.LookVector * 100)
 end
 
 local function Begin(self)
@@ -81,6 +92,10 @@ local function Begin(self)
 	})
     task.wait(0.4)
     Energise()
+
+    while task.wait(math.random(3, 6)) do
+        Fire()
+    end
 end
 
 return {
