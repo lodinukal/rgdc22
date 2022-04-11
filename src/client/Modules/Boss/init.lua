@@ -1,4 +1,6 @@
 local SoundService = game:GetService("SoundService")
+local ContextActionService = game:GetService("ContextActionService")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -12,13 +14,23 @@ local Ship = BattleFolder:WaitForChild("Ship")
 local Particles = ReplicatedStorage:WaitForChild("Particles")
 local Hit = Particles:WaitForChild("Hit")
 
+local Ship = BattleFolder:WaitForChild("Ship") :: Model
+
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
+
+local Boundaries = {
+    BattleFolder:WaitForChild("ShipEdgeL"),
+    BattleFolder:WaitForChild("ShipEdgeU")
+} :: {BasePart}
 
 local BossRoar = SoundService:WaitForChild("Roar")
 
 local Cache = {}
 local Started = false
 local Projectiles = {}
+
+local ShipPos = 0.5
+local SHIP_SPEED_PER = 0.5
 
 local function RenderStepCleanup()
     for id, _ in pairs(Cache) do
@@ -51,9 +63,21 @@ local function CameraSwivels()
     end)
 end
 
+local function UpdateShipPosition()
+    Bind("boss_ship", Enum.RenderPriority.Input.Value, function(deltaTime)
+        local dir = (if UserInputService:IsKeyDown(Enum.KeyCode.S) or UserInputService:IsKeyDown(Enum.KeyCode.Down) then -1 else 0) +
+            (if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then 1 else 0)
+
+        ShipPos = math.clamp(ShipPos + SHIP_SPEED_PER * dir * deltaTime, 0, 1)
+        local lerpedPosition = Boundaries[1].Position:Lerp(Boundaries[2].Position, ShipPos)
+        Ship:SetPrimaryPartCFrame(Boundaries[1].CFrame.Rotation + lerpedPosition)
+    end)
+end
+
 local function StartLoopingAnimations()
     StartBossAnimation()
     CameraSwivels()
+    UpdateShipPosition()
 end
 
 -- Start
@@ -123,6 +147,7 @@ local function HitDetection()
         end
     end)
 end
+
 
 local function Begin(self)
     if Started then
