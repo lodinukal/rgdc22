@@ -1,10 +1,16 @@
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local BattleFolder = workspace:WaitForChild("Boss")
 local Invader = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
 local Projectile = BattleFolder:WaitForChild("Projectile")
 local ShootPart = Invader:WaitForChild("ShootPart")
+local Ship = BattleFolder:WaitForChild("Ship")
+
+local Particles = ReplicatedStorage:WaitForChild("Particles")
+local Hit = Particles:WaitForChild("Hit")
 
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
 
@@ -12,6 +18,7 @@ local BossRoar = SoundService:WaitForChild("Roar")
 
 local Cache = {}
 local Started = false
+local Projectiles = {}
 
 local function RenderStepCleanup()
     for id, _ in pairs(Cache) do
@@ -73,7 +80,48 @@ local function Fire()
     newProjectile.CFrame = ShootPart.CFrame
     newProjectile.Anchored = false
     newProjectile.Parent = BattleFolder
-    newProjectile:ApplyImpulse(ShootPart.CFrame.LookVector * 100)
+    newProjectile:ApplyImpulse(ShootPart.CFrame.LookVector * math.random(150, 300))
+
+    local connection
+    connection = newProjectile.AncestryChanged:Connect(function(child, parent)
+        connection:Disconnect()
+        Projectiles[newProjectile] = nil
+    end)
+
+    Projectiles[newProjectile] = connection
+end
+
+local function OnHit(projectileCFrame)
+    local newHit = Hit:Clone()
+    newHit.CFrame = projectileCFrame
+    newHit.Parent = BattleFolder
+
+    task.spawn(function()
+        for i, v in ipairs(newHit:GetChildren()) do
+            v:Emit()
+        end
+
+        task.wait(2)
+
+        newHit:Destroy()
+    end)
+end
+
+local function HitDetection()
+    RunService.Heartbeat:Connect(function(deltaTime)
+        for i, v in pairs(Projectiles) do
+            local params = RaycastParams.new()
+            params.FilterDescendantsInstances = {Ship}
+            params.FilterType = Enum.RaycastFilterType.Whitelist
+            local result = workspace:Raycast(i.Position, i.CFrame.LookVector, params)
+            if result then
+                OnHit(i.CFrame)
+                v:Disconnect()
+                Projectiles[i] = nil
+                i:Destroy()
+            end
+        end
+    end)
 end
 
 local function Begin(self)
@@ -93,8 +141,9 @@ local function Begin(self)
 	})
     task.wait(0.4)
     Energise()
+    HitDetection()
 
-    while task.wait(math.random(3, 6)) do
+    while task.wait(1) do
         Fire()
     end
 end
