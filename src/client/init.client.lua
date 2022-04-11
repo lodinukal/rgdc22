@@ -39,6 +39,7 @@ do
 end
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
+local Dialogue = require(Gui:WaitForChild("Dialogue"))
 
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
