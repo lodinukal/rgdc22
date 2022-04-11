@@ -12,6 +12,10 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
+local Modality = require(Modules:WaitForChild("Modality"))
+Modality:Start()
+
+local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
 -- DeathScreen
 do
     local openEvent = Signal.new()
@@ -19,9 +23,11 @@ do
 
     local function CharacterAdded(character)
         closeEvent:Fire()
+        shared.physenabled:set(true)
         local humanoid = character:WaitForChild("Humanoid")
         humanoid.Died:Connect(function()
             openEvent:Fire()
+            shared.boss:set(false)
         end)
     end
 
@@ -36,8 +42,8 @@ do
     
 end
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
-local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
 local Dialogue = require(Gui:WaitForChild("Dialogue"))
+local BossBattle = require(Gui:WaitForChild("BossBattle"))
 
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
@@ -49,8 +55,6 @@ local Laser = require(Modules:WaitForChild("Laser"))
 local Time = require(Modules:WaitForChild("Time"))
 local Traps = require(Modules:WaitForChild("Traps"))
 local Explosions = require(Modules:WaitForChild("Explosions"))
-local Modality = require(Modules:WaitForChild("Modality"))
-Modality:Start()
 
 local LevelModule = require(Modules:WaitForChild("LevelModule"))
 LevelModule:Start()
