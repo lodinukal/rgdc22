@@ -110,6 +110,8 @@ local function Begin(self)
     OrganiseStartup()
     StartLoopingAnimations()
 
+    shared.boss:set(true)
+
     -- Taunt
     task.wait(1)
     Dialogue.enabled:set(true)
