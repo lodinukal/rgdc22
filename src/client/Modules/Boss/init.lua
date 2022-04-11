@@ -17,6 +17,7 @@ local Hit = Particles:WaitForChild("Hit")
 local Ship = BattleFolder:WaitForChild("Ship") :: Model
 
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
+local BossBattle = require(script.Parent.Parent.Gui.BossBattle)
 
 local Boundaries = {
     BattleFolder:WaitForChild("ShipEdgeL"),
@@ -158,7 +159,7 @@ local function Begin(self)
     OrganiseStartup()
     StartLoopingAnimations()
 
-    shared.boss:set(true)
+    BossBattle.enabled:set(true)
 
     -- Taunt
     task.wait(1)

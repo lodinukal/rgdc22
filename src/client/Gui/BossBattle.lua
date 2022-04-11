@@ -17,7 +17,7 @@ local bossHealth = Value(100)
 local shipMaxHealth = Value(20)
 local bossMaxHealth = Value(100)
 
-shared.boss = Value(false)
+local enabled = Value(false)
 
 local function HealthTab(props)
     return New "Frame" {
@@ -86,7 +86,7 @@ local screenGui = New "ScreenGui" {
     ResetOnSpawn = false,
     DisplayOrder = 9998,
     IgnoreGuiInset = true,
-    Enabled = shared.boss,
+    Enabled = enabled,
     [Children] = {
         HealthTab {
             Name = "You",
@@ -123,5 +123,6 @@ local screenGui = New "ScreenGui" {
 return {
     HealthTab = HealthTab,
     bossHealth = bossHealth,
-    shipHealth = shipHealth
+    shipHealth = shipHealth,
+    enabled = enabled,
 }

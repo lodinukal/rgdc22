@@ -16,6 +16,7 @@ local Modality = require(Modules:WaitForChild("Modality"))
 Modality:Start()
 
 local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
+local BossBattle = require(Gui:WaitForChild("BossBattle"))
 -- DeathScreen
 do
     local openEvent = Signal.new()
@@ -27,7 +28,8 @@ do
         local humanoid = character:WaitForChild("Humanoid")
         humanoid.Died:Connect(function()
             openEvent:Fire()
-            shared.boss:set(false)
+            BossBattle.enabled:set(false)
+
         end)
     end
 
@@ -43,7 +45,6 @@ do
 end
 local PhysicsHighLight = require(Gui:WaitForChild("PhysicsHighLight"))
 local Dialogue = require(Gui:WaitForChild("Dialogue"))
-local BossBattle = require(Gui:WaitForChild("BossBattle"))
 
 local CameraModule = require(Modules:WaitForChild("CameraModule"))
 local PhysicsModule = require(Modules:WaitForChild("Physics"))
