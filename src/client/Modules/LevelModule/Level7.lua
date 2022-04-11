@@ -56,6 +56,7 @@ local function OnUnloaded(self, map)
 end
 
 local function CanProceed()
+	return true
 end
 
 return {

@@ -63,4 +63,8 @@ function FirstPersonModule:Start()
 	end)
 end
 
+function FirstPersonModule:Stop()
+	RunService:UnbindFromRenderStep("FirstPerson")
+end
+
 return FirstPersonModule

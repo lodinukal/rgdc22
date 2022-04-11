@@ -1,5 +1,6 @@
 local StarterGui = game:GetService("StarterGui")
 local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -55,15 +56,21 @@ local LevelModules = {
 }
 
 local LevelOrder = {
-	-- "End Hallway",
-	-- "Medical Hub",
-	-- "Starboard Command Center",
-	-- "Starboard Lower Gate",
-	-- "Reactor",
-	-- "Reactor Chamber",
-	-- "Bridge Foyer",
+	"End Hallway",
+	"Medical Hub",
+	"Starboard Command Center",
+	"Starboard Lower Gate",
+	"Reactor",
+	"Reactor Chamber",
+	"Bridge Foyer",
 	"The Bridge"
 }
+
+if RunService:IsStudio() then
+	LevelOrder = {
+		"The Bridge"
+	}
+end
 
 local LevelModule = {}
 

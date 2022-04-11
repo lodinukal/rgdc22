@@ -77,9 +77,10 @@ function Phys:Start()
 		PUSH_PULL_BINDING,
 		function(...)
 			self:ProcessPushPull(...)
+			return Enum.ContextActionResult.Pass
 		end,
 		false,
-		Enum.ContextActionPriority.Default.Value,
+		Enum.ContextActionPriority.High.Value,
 		Enum.UserInputType.MouseButton1,
 		Enum.UserInputType.MouseButton2
 	)

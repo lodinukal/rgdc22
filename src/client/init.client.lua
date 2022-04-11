@@ -12,8 +12,6 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
-local LevelModule = require(Modules:WaitForChild("LevelModule"))
-LevelModule:Start()
 -- DeathScreen
 do
     local openEvent = Signal.new()
@@ -53,5 +51,8 @@ local Traps = require(Modules:WaitForChild("Traps"))
 local Explosions = require(Modules:WaitForChild("Explosions"))
 local Modality = require(Modules:WaitForChild("Modality"))
 Modality:Start()
+
+local LevelModule = require(Modules:WaitForChild("LevelModule"))
+LevelModule:Start()
 
 local Player = game.Players.LocalPlayer

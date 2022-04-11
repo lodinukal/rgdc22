@@ -13,6 +13,8 @@ local Tween = Fusion.Tween
 local Value = Fusion.Value
 local OnEvent = Fusion.OnEvent
 
+shared.physenabled = Value(true)
+
 local PhysicsModule = require(script.Parent.Parent.Modules:WaitForChild("Physics"))
 
 local buttonSound = SoundService:WaitForChild("ButtonSound") :: Sound
@@ -57,9 +59,11 @@ end
 
 local ACTION_NAME = "wp_physics_switch_action"
 ContextActionService:BindAction(ACTION_NAME, function(name, inputState, inputObject)
-	if inputState == Enum.UserInputState.Begin then
+	if inputState == Enum.UserInputState.Begin and shared.physenabled:get() then
 		NextMode()
 	end
+
+	return Enum.ContextActionResult.Pass
 end, false, Enum.KeyCode.E)
 
 local icon = Computed(function()
@@ -71,6 +75,7 @@ PhysicsSwitcher = New("ScreenGui")({
 	Name = "PhysicsSwitcher",
 	ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	Parent = Players.LocalPlayer:WaitForChild("PlayerGui"),
+	Enabled = shared.physenabled,
 
 	[Children] = {
 		New("Frame")({

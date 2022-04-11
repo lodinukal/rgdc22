@@ -3,6 +3,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local SoundService = game:GetService("SoundService")
 local PolicyService = game:GetService("PolicyService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -28,8 +29,13 @@ local sound = SoundService:WaitForChild("Speech") :: Sound
 local PROGRESS_TIME = 0.1
 local PIPE_PAUSE = 0.2
 local BETWEEN = 0.6
-local completed = RDL.Signal.new()
 local skipped = false
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.F then
+        skipped = true
+    end
+end)
 
 local function StartGraphemes(textState, out)
     local text = textState:get()
@@ -78,7 +84,7 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
         speakerName:set(name)
         for _, text in ipairs(textList) do
             dialogueText:set(text)
-            completed:Wait()
+            StartGraphemes(dialogueText, outputText)
             task.wait(BETWEEN)
         end
         task.wait(0.4)
@@ -89,11 +95,6 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
     newDialogue:Connect(function(name, textList)
         table.insert(bin, {name = name, textList = textList})
     end)
-
-    local changedObserver = Observer(dialogueText):onChange(function()
-        StartGraphemes(dialogueText, outputText)
-    end)
-    dialogueText:set(dialogueText:get(), true)
 
     local computedTransparency = Computed(function()
         return if props.enabled:get() then 0 else 1
@@ -114,7 +115,6 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
                 [OnEvent "InputBegan"] = function(inputObject: InputObject)
                     if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
                         skipped = true
-                        completed:Fire()
                     end
                 end,
 
@@ -148,7 +148,33 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
                         TextYAlignment = Enum.TextYAlignment.Top,
                         Text = outputText,
                         Position = UDim2.new(0, 0, 0.3, 0),
-                        Size = UDim2.new(1, 0, 0.7, 0)
+                        Size = UDim2.new(1, 0, 0.7, 0),
+                        [Children] = {
+                            New("TextLabel")({
+                                Name = "KeyboardPrompt",
+                                Font = Enum.Font.Highway,
+                                RichText = true,
+                                Text = "F to skip",
+                                TextColor3 = Color3.fromRGB(213, 213, 213),
+                                TextScaled = true,
+                                TextSize = 14,
+                                TextStrokeTransparency = tweenedTransparency,
+                                TextTransparency = tweenedTransparency,
+                                TextWrapped = true,
+                                AnchorPoint = Vector2.new(1, 0.2),
+                                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                                BackgroundTransparency = 1,
+                                Position = UDim2.fromScale(0.3, 1),
+                                Size = UDim2.fromScale(0.4, 0.3),
+    
+                                [Children] = {
+                                    New("UIAspectRatioConstraint")({
+                                        Name = "UIAspectRatioConstraint",
+                                        AspectRatio = 4,
+                                    }),
+                                },
+                            })
+                        }
                     }
                 }
             },
