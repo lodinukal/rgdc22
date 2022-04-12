@@ -21,14 +21,11 @@ local Fusion = require(ReplicatedStorage:WaitForChild("Common").fusion)
 
 local Dialogue = require(script.Parent.Parent.Parent.Gui.Dialogue)
 local BossTransition = require(script.Parent.Parent.Parent.Gui.BossTransition)
-local FirstPerson = require(script.Parent.Parent.FirstPersonModule)
 local Boss = require(script.Parent.Parent.Boss)
 
 local Data = {
 	Folder = Levels:WaitForChild("Level8"),
 }
-
-local BossHealth = Fusion.Value(100)
 
 local swishTween = TweenInfo.new(1)
 
@@ -44,8 +41,6 @@ local function OnLoaded(self, map)
 	})
 	local character = Player.Character
 	character.HumanoidRootPart.Anchored = true
-	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-	FirstPerson:Stop()
 	TweenService:Create(workspace.CurrentCamera, swishTween, {
 		CFrame = CFrame.lookAt(character:WaitForChild("Head").Position, map:WaitForChild("invader").Position)
 	}):Play()

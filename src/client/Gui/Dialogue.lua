@@ -61,6 +61,7 @@ end
 
 local newDialogue = RDL.Signal.new()
 local completed = RDL.Signal.new()
+local stop = RDL.Signal.new()
 
 function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
 
@@ -70,6 +71,10 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
     local blocking = false
 
     local bin = {}
+
+    stop:Connect(function()
+        bin = {}
+    end)
 
     RunService:BindToRenderStep("wp_dialogue", Enum.RenderPriority.Input.Value, function(delta)
         if not bin[1] then
@@ -195,5 +200,6 @@ return {
     Component = Dialogue,
     event = newDialogue,
     enabled = enabled,
-    completed = completed
+    completed = completed,
+    stop = stop
 }

@@ -68,6 +68,7 @@ local LevelOrder = {
 
 if RunService:IsStudio() then
 	LevelOrder = {
+		-- "Bridge Foyer",
 		"The Bridge"
 	}
 end
@@ -78,6 +79,7 @@ function LevelModule:Start()
 	self.LevelledUp = Signal.new()
 	self.Gui = LevelTransition({
 		LevelledUp = self.LevelledUp,
+		Module = self,
 	})
 
 	local function CharacterAdded(character)
@@ -106,6 +108,7 @@ function LevelModule:LoadLevel(levelName)
 	if not levelModule then
 		return
 	end
+	shared.physenabled:set(true)
 	self.LevelModule = levelModule
 
 	local clonedLevelFolder = levelModule.Data.Folder:Clone()
@@ -218,6 +221,19 @@ function LevelModule:UnloadLevel(map)
 	self.LevelModule:OnUnloaded(map)
 
 	map:Destroy()
+end
+
+function LevelModule:ResetLevel()
+	local currentLevelFolder = self.CurrentLevelFolder
+	if currentLevelFolder then
+		self:UnloadLevel(currentLevelFolder)
+	end
+
+	local character = Player.Character or Player.CharacterAdded:Wait()
+	if not character.PrimaryPart then
+		character:GetPropertyChangedSignal("PrimaryPart"):Wait()
+	end
+	self:LoadLevel(self.CurrentLevelName or LevelOrder[1])
 end
 
 return LevelModule

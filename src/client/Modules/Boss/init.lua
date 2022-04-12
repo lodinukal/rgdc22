@@ -26,6 +26,9 @@ local Boundaries = {
 
 local BossRoar = SoundService:WaitForChild("Roar")
 
+local oldfirstperson = nil
+local FirstPerson = require(script.Parent.FirstPersonModule)
+
 local Cache = {}
 local Started = false
 local Projectiles = {}
@@ -86,7 +89,11 @@ end
 local function OrganiseStartup()
 end
 
+local enabled = false
 local function Cleanup()
+    enabled = false
+	workspace.CurrentCamera.CameraType = oldfirstperson
+    FirstPerson:Start()
     RenderStepCleanup()
 end
 
@@ -148,6 +155,11 @@ local function Begin(self)
     end
 
     Started = true
+    enabled = true
+    oldfirstperson = workspace.CurrentCamera.CameraType
+	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+	FirstPerson:Stop()
+
     OrganiseStartup()
     StartLoopingAnimations()
 
@@ -163,7 +175,7 @@ local function Begin(self)
     Energise()
     Simulate()
 
-    while task.wait(1) do
+    while task.wait(1) and enabled do
         Fire()
     end
 end

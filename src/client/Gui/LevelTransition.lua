@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContextActionService = game:GetService("ContextActionService")
 local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 
 local Common = ReplicatedStorage:WaitForChild("Common")
@@ -12,9 +13,12 @@ local Children = Fusion.Children
 local Tween = Fusion.Tween
 local Value = Fusion.Value
 
-local Levels = require(script.Parent.Parent.Modules.LevelModule)
+local Levels = nil
 local levelHint = Value(false)
 local hintSound = SoundService:WaitForChild("Hint") :: Sound
+
+local BossBattle = require(script.Parent.BossBattle)
+local Dialogue = require(script.Parent.Dialogue)
 
 Fusion.Observer(levelHint):onChange(function()
 	hintSound:Play()
@@ -28,13 +32,41 @@ ContextActionService:BindAction("Hint", function(actionName, state, inputObject)
 	return Enum.ContextActionResult.Pass
 end, false, Enum.KeyCode.H)
 
+local validation = false
+local VALIDATION_TIME = 5
+local function RequestReset()
+	if validation == true then
+		BossBattle.enabled:set(false)
+		Levels:ResetLevel()
+		validation = false
+		return
+	end
+	if Levels.CurrentLevelName == "The Bridge" then
+		StarterGui:SetCore("SendNotification", {
+			Title = "No Reset",
+			Text = "You can't reset here.",
+			Icon = "rbxassetid://438217404",
+			Duration = VALIDATION_TIME
+		})
+		return
+	end
+	StarterGui:SetCore("SendNotification", {
+		Title = "Reset Level",
+		Text = "Repeat this action to confirm a level reset.",
+		Icon = "rbxassetid://438217404",
+		Duration = VALIDATION_TIME
+	})
+	validation = true
+	task.delay(VALIDATION_TIME, function()
+		validation = false
+	end)
+end
+
 ContextActionService:BindAction("Reload", function(actionName, state, inputObject)
 	if state ~= Enum.UserInputState.Begin then
 		return
 	end
-	if Levels.CurrentLevelName then
-		Levels:LoadLevel(Levels.CurrentLevelName)
-	end
+	RequestReset()
 	return Enum.ContextActionResult.Pass
 end, false, Enum.KeyCode.R)
 
@@ -50,6 +82,7 @@ local levelHints = {
 }
 
 local function LevelTransition(props)
+	Levels = props.Module
 	local levelName = Value("Level 1")
 	local anchorPoint = Value(Vector2.new(0.5, 0))
 
@@ -118,9 +151,7 @@ local function LevelTransition(props)
 						Size = UDim2.fromScale(0.2, 0.2),
 						SizeConstraint = Enum.SizeConstraint.RelativeXX,
 						[Fusion.OnEvent("Activated")] = function()
-							if Levels.CurrentLevelName then
-								Levels:LoadLevel(Levels.CurrentLevelName)
-							end
+							RequestReset()
 						end,
 			
 						[Children] = {
