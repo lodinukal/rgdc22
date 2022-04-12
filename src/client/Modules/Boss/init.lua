@@ -307,10 +307,10 @@ local function Simulate()
             end
             local part = projectile.Part
 
-            part.CFrame *= CFrame.new(0,0, -60*deltaTime)
+            part.CFrame *= CFrame.new(0,0, -80*deltaTime)
 
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {Invader, Ship.Shield, BoundBox}
+            params.FilterDescendantsInstances = {Invader, if projectile.reflected then nil else Ship.Shield, BoundBox}
             params.FilterType = Enum.RaycastFilterType.Whitelist
 
             local result = workspace:Raycast(part.Position, part.CFrame.LookVector * 2, params)
@@ -327,6 +327,7 @@ local function Simulate()
                     local n = result.Normal
                     local reflectedNormal = d - (2 * d:Dot(n) * n)
                     part.CFrame = CFrame.lookAt(part.Position, part.Position + reflectedNormal)
+                    projectile.reflected = true
                 elseif result.Instance == BoundBox then
                     table.remove(Projectiles, i)
                     part:Destroy()
