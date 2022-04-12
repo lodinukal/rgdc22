@@ -12,6 +12,8 @@ local Fusion = require(Common:WaitForChild("fusion"))
 local Modules = script:WaitForChild("Modules")
 local Gui = script:WaitForChild("Gui")
 
+local screen = require(Gui:WaitForChild("LoadingScreen"))
+
 local Modality = require(Modules:WaitForChild("Modality"))
 Modality:Start()
 
@@ -75,6 +77,9 @@ local Laser = require(Modules:WaitForChild("Laser"))
 local Time = require(Modules:WaitForChild("Time"))
 local Traps = require(Modules:WaitForChild("Traps"))
 local Explosions = require(Modules:WaitForChild("Explosions"))
+
+task.wait(3)
+screen:Destroy()
 
 assert(coreCall('SetCore', 'ResetButtonCallback', false))
 local LevelModule = require(Modules:WaitForChild("LevelModule"))
