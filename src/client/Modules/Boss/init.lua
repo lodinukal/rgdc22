@@ -51,17 +51,17 @@ end
 local actualbossPos = 0.5
 local bossPos = 0.5
 local function StartBossAnimation()
-    local amplitude = 60
+    local amplitude = 120
     local elapsed = 0
     local originalCFrame = Invader.PrimaryPart.CFrame
     local seed = math.random(1, 100)
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
         -- Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(math.cos(elapsed/2) * 2, math.sin(elapsed/2) * amplitude, 0))
-        bossPos += math.noise(seed, 112, elapsed)
+        -- bossPos += math.noise(seed, 112, elapsed)
         bossPos = math.clamp(bossPos, -1, 1)
-        actualbossPos = actualbossPos + (bossPos - actualbossPos) * 0.4 * delta
-        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(0, (-amplitude/2) + actualbossPos * amplitude, 0))
+        actualbossPos = actualbossPos + (bossPos - actualbossPos) * 0.95 * delta
+        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(0, actualbossPos * amplitude, 0))
         -- Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(0, math.noise(seed, 112, elapsed) * 3, 0))
     end)
 end
@@ -143,23 +143,36 @@ local function Move2()
     end
 end
 
+local function Move3()
+    bossPos = 1
+    task.wait(2)
+    for i = 1, 5 do
+        bossPos = 1 - 0.4 * i
+        task.wait(1)
+        Move1()
+    end
+end
+
 local function Dodge()
-    bossPos += math.sign(math.random(-10, 10)) * 0.5
-    Move1()
+    local x = math.sign(bossPos)
+
+    bossPos += -x * (math.random(6, 12) / 10)
 end
 
 local function Fire()
-    local random = math.random(1, 100)
-    local dodgeRandom = math.random(1, 30)
-    if random < 50 then
-        Move1()
-    elseif random < 70 then
-        Move2()
-    else
-        Move1()
-    end
-    if dodgeRandom < 13 then
-        Dodge()
+    if BossBattle.bossPhase:get() == 1 then
+        local random = math.random(1, 100)
+        local dodgeRandom = math.random(1, 30)
+        if random < 45 then
+            Move1()
+        elseif random < 90 then
+            Move2()
+        elseif random < 100 then
+            Move3()
+        end
+        if dodgeRandom < 20 then
+            Dodge()
+        end
     end
 end
 

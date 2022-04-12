@@ -17,6 +17,16 @@ local bossHealth = Value(100)
 local shipMaxHealth = Value(40)
 local bossMaxHealth = Value(100)
 
+local bossPhase = Value(1)
+local bossMaxPhase = Value(2)
+
+local function ResetBattleState()
+    shipHealth:set(shipMaxHealth:get())
+    bossHealth:set(bossMaxHealth:get())
+
+    bossPhase:set(1)
+end
+
 local enabled = Value(false)
 
 local function HealthTab(props)
@@ -125,4 +135,8 @@ return {
     bossHealth = bossHealth,
     shipHealth = shipHealth,
     enabled = enabled,
+
+    ResetBattleState = ResetBattleState,
+
+    bossPhase = bossPhase
 }
