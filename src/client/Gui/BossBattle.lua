@@ -11,10 +11,10 @@ local Children = Fusion.Children
 local Tween = Fusion.Tween
 local Value = Fusion.Value
 
-local shipHealth = Value(20)
+local shipHealth = Value(40)
 local bossHealth = Value(100)
 
-local shipMaxHealth = Value(20)
+local shipMaxHealth = Value(40)
 local bossMaxHealth = Value(100)
 
 local enabled = Value(false)

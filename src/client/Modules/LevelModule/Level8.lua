@@ -1,6 +1,7 @@
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Levels = ReplicatedStorage:WaitForChild("Levels")
@@ -29,6 +30,8 @@ local Data = {
 
 local swishTween = TweenInfo.new(1)
 
+local BattleSound = SoundService:WaitForChild("BattleSound")
+
 local function OnLoaded(self, map)
 	shared.physenabled:set(false)
 	task.wait(2)
@@ -50,11 +53,13 @@ local function OnLoaded(self, map)
 		task.wait(1)
 		BossTransition:set(false)
 	end)
+	BattleSound:Play()
 	task.wait(1)
 	Boss.Begin()
 end
 
 local function OnUnloaded(self, map)
+	BattleSound:Stop()
 end
 
 local function CanProceed()

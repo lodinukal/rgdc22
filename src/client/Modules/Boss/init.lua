@@ -9,7 +9,7 @@ local Invader = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
 local Projectile = BattleFolder:WaitForChild("Projectile")
 local ShootPart = Invader:WaitForChild("ShootPart")
-local Ship = BattleFolder:WaitForChild("Ship")
+local BoundBox = BattleFolder:WaitForChild("BoundBox")
 
 local Particles = ReplicatedStorage:WaitForChild("Particles")
 local Hit = Particles:WaitForChild("Hit")
@@ -48,13 +48,21 @@ local function Bind(id: string, priority: number, fnc: (deltaTime: number) -> ni
 end
 
 -- Loop
+local actualbossPos = 0.5
+local bossPos = 0.5
 local function StartBossAnimation()
     local amplitude = 60
     local elapsed = 0
     local originalCFrame = Invader.PrimaryPart.CFrame
+    local seed = math.random(1, 100)
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
-        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(math.cos(elapsed/2) * 2, math.sin(elapsed/2) * amplitude, 0))
+        -- Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(math.cos(elapsed/2) * 2, math.sin(elapsed/2) * amplitude, 0))
+        bossPos += math.noise(seed, 112, elapsed)
+        bossPos = math.clamp(bossPos, -1, 1)
+        actualbossPos = actualbossPos + (bossPos - actualbossPos) * 0.4 * delta
+        Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(0, (-amplitude/2) + actualbossPos * amplitude, 0))
+        -- Invader:SetPrimaryPartCFrame(originalCFrame + Vector3.new(0, math.noise(seed, 112, elapsed) * 3, 0))
     end)
 end
 
@@ -107,19 +115,60 @@ local function Energise()
     end
 end
 
-local function Fire()
+local function Move1()
     local newProjectile = Projectile:Clone()
     newProjectile.CFrame = ShootPart.CFrame
     newProjectile.Parent = BattleFolder
+    newProjectile.CFrame *= CFrame.Angles(0, 0, math.rad(math.random(-10, 10)))
 
     table.insert(Projectiles, {
-        Part = newProjectile,
-        MovingBackwards = false
+        Part = newProjectile
     })
 end
 
+local function GetBulletRotation(arc, count, index)
+    return math.rad((-arc/2) + (arc / count * (index - 1)))
+end
+
+local function Move2()
+    for i = 1, 3 do
+        local newProjectile = Projectile:Clone()
+        -- newProjectile.CFrame = ShootPart.CFrame * CFrame.Angles(GetBulletRotation(40, 3, i), 0, 0)
+        newProjectile.CFrame = ShootPart.CFrame * CFrame.new(0, -60 + (20 * (i - 1)), 0)
+        newProjectile.Parent = BattleFolder
+    
+        table.insert(Projectiles, {
+            Part = newProjectile
+        })
+    end
+end
+
+local function Dodge()
+    bossPos += math.sign(math.random(-10, 10)) * 0.5
+    Move1()
+end
+
+local function Fire()
+    local random = math.random(1, 100)
+    local dodgeRandom = math.random(1, 30)
+    if random < 50 then
+        Move1()
+    elseif random < 70 then
+        Move2()
+    else
+        Move1()
+    end
+    if dodgeRandom < 13 then
+        Dodge()
+    end
+end
+
 local function HitBoss()
-    print("Hit!")
+    BossBattle.bossHealth:set(BossBattle.bossHealth:get() - 5)
+end
+
+local function HitUs()
+    BossBattle.shipHealth:set(BossBattle.shipHealth:get() - 1)
 end
 
 local function Simulate()
@@ -127,22 +176,28 @@ local function Simulate()
         for i = #Projectiles, 1, -1 do
             local projectile = Projectiles[i]
             local part = projectile.Part
-            local movingBackwards = projectile.MovingBackwards
 
-            part.CFrame *= CFrame.new(0,0, movingBackwards and 60*deltaTime or -60*deltaTime)
+            part.CFrame *= CFrame.new(0,0, -60*deltaTime)
 
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {movingBackwards and Invader or Ship.Shield}
+            params.FilterDescendantsInstances = {Invader, Ship.Shield, BoundBox}
             params.FilterType = Enum.RaycastFilterType.Whitelist
 
-            local result = workspace:Raycast(part.Position, movingBackwards and -part.CFrame.LookVector or part.CFrame.LookVector, params)
+            local result = workspace:Raycast(part.Position, part.CFrame.LookVector, params)
             if result then
-                if movingBackwards then
+                if result.Instance:IsDescendantOf(Invader) then
                     table.remove(Projectiles, i)
                     part:Destroy()
                     HitBoss()
-                else
-                    projectile.MovingBackwards = true
+                elseif result.Instance == Ship.Shield then
+                    local d = part.CFrame.LookVector
+                    local n = result.Normal
+                    local reflectedNormal = d - (2 * d:Dot(n) * n)
+                    part.CFrame = CFrame.lookAt(part.Position, part.Position + reflectedNormal)
+                elseif result.Instance == BoundBox then
+                    table.remove(Projectiles, i)
+                    part:Destroy()
+                    HitUs()
                 end
             end
         end
