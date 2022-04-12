@@ -21,6 +21,7 @@ local screenGui = New "ScreenGui" {
     ResetOnSpawn = false,
     DisplayOrder = 9998,
     IgnoreGuiInset = true,
+    Name = "re",
     [Children] = {
         New "Frame" {
             Size = UDim2.new(1, 0, 1, 0),

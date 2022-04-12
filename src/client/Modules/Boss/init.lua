@@ -237,7 +237,8 @@ local function Fire()
 end
 
 local function BossDeath()
-    Cleanup()
+    CleanupLate()
+    Players.LocalPlayer.Character:SetPrimaryPartCFrame(workspace:WaitForChild("End"):GetPrimaryPartCFrame())
 end
 
 local function HitBoss()
@@ -267,9 +268,21 @@ local function HitBoss()
             Dialogue.event:Fire("Space Invader", {
                 "H|-||H|ow|, d|-d||id| y|o||u||, -",
             })
+            Cleanup()
             recMode = true
             Energise()
+            Dialogue.completed:Wait()
+            BossTransition:set(true)
             BossDeath()
+            task.wait(2)
+            BossTransition:set(false)
+            task.wait(2)
+            for _, gui in ipairs(Players.LocalPlayer.PlayerGui:GetChildren()) do
+                if gui.Name ~= "re" then
+                    gui.Parent = nil
+                end
+            end
+            Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
             -- TODO: Death fx
             -- TODO: Congrats screen
         end
