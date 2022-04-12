@@ -12,6 +12,7 @@ local Children = Fusion.Children
 local Tween = Fusion.Tween
 local Value = Fusion.Value
 
+local Levels = require(script.Parent.Parent.Modules.LevelModule)
 local levelHint = Value(false)
 local hintSound = SoundService:WaitForChild("Hint") :: Sound
 
@@ -24,7 +25,18 @@ ContextActionService:BindAction("Hint", function(actionName, state, inputObject)
 		return
 	end
 	levelHint:set(not levelHint:get())
+	return Enum.ContextActionResult.Pass
 end, false, Enum.KeyCode.H)
+
+ContextActionService:BindAction("Reload", function(actionName, state, inputObject)
+	if state ~= Enum.UserInputState.Begin then
+		return
+	end
+	if Levels.CurrentLevelName then
+		Levels:LoadLevel(Levels.CurrentLevelName)
+	end
+	return Enum.ContextActionResult.Pass
+end, false, Enum.KeyCode.R)
 
 local levelHints = {
 	["End Hallway"] = "Hint - Try extruding the pipe.",
@@ -86,6 +98,57 @@ local function LevelTransition(props)
 				TextSize = 40,
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 			}),
+
+			New "Frame" {
+				Name = "Frame",
+				AnchorPoint = Vector2.new(1, 1),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				Position = UDim2.fromScale(1, 1),
+				Size = UDim2.fromScale(0.25, 0.322),
+			
+				[Children] = {
+					New "ImageButton" {
+						Name = "ImageLabel",
+						Image = "rbxassetid://438217404",
+						AnchorPoint = Vector2.new(1, 1),
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						Position = UDim2.fromScale(0.681, 0.897),
+						Size = UDim2.fromScale(0.2, 0.2),
+						SizeConstraint = Enum.SizeConstraint.RelativeXX,
+						[Fusion.OnEvent("Activated")] = function()
+							if Levels.CurrentLevelName then
+								Levels:LoadLevel(Levels.CurrentLevelName)
+							end
+						end,
+			
+						[Children] = {
+							New "TextLabel" {
+								Name = "KeyboardPrompt",
+								Font = Enum.Font.Highway,
+								RichText = true,
+								Text = "R",
+								TextColor3 = Color3.fromRGB(213, 213, 213),
+								TextScaled = true,
+								TextSize = 14,
+								TextStrokeTransparency = 0,
+								TextWrapped = true,
+								AnchorPoint = Vector2.new(1, 0.2),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = 1,
+								Position = UDim2.fromScale(0.5, 0),
+								Size = UDim2.fromScale(0.588, 0.516),
+							},
+						}
+					},
+			
+					New "UIAspectRatioConstraint" {
+						Name = "UIAspectRatioConstraint",
+						AspectRatio = 1.5,
+					},
+				}
+			},
 
 			New("Frame")({
 				Name = "Frame",
