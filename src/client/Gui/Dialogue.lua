@@ -164,7 +164,7 @@ function Dialogue(props: {enabled: Fusion.State<boolean>}) : Instance
                                 Text = "F to skip",
                                 TextColor3 = Color3.fromRGB(213, 213, 213),
                                 TextScaled = true,
-                                TextSize = 14,
+                                TextSize = 28,
                                 TextStrokeTransparency = tweenedTransparency,
                                 TextTransparency = tweenedTransparency,
                                 TextWrapped = true,

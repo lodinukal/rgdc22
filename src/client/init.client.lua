@@ -15,6 +15,25 @@ local Gui = script:WaitForChild("Gui")
 local Modality = require(Modules:WaitForChild("Modality"))
 Modality:Start()
 
+local coreCall do
+	local MAX_RETRIES = 8
+
+	local StarterGui = game:GetService('StarterGui')
+	local RunService = game:GetService('RunService')
+
+	function coreCall(method, ...)
+		local result = {}
+		for retries = 1, MAX_RETRIES do
+			result = {pcall(StarterGui[method], StarterGui, ...)}
+			if result[1] then
+				break
+			end
+			RunService.Stepped:Wait()
+		end
+		return unpack(result)
+	end
+end
+
 local PhysicsSwitcher = require(Gui:WaitForChild("PhysicsSwitcher"))
 local BossBattle = require(Gui:WaitForChild("BossBattle"))
 -- DeathScreen
@@ -57,6 +76,7 @@ local Time = require(Modules:WaitForChild("Time"))
 local Traps = require(Modules:WaitForChild("Traps"))
 local Explosions = require(Modules:WaitForChild("Explosions"))
 
+assert(coreCall('SetCore', 'ResetButtonCallback', false))
 local LevelModule = require(Modules:WaitForChild("LevelModule"))
 LevelModule:Start()
 

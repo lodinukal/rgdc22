@@ -21,6 +21,7 @@ local bossPhase = Value(1)
 local bossMaxPhase = Value(2)
 
 local function ResetBattleState()
+    bossMaxHealth:set(100)
     shipHealth:set(shipMaxHealth:get())
     bossHealth:set(bossMaxHealth:get())
 
@@ -130,6 +131,14 @@ local screenGui = New "ScreenGui" {
     }
 }
 
+local function Phase2()
+    bossPhase:set(2)
+    bossMaxHealth:set(200)
+    bossHealth:set(bossMaxHealth:get())
+end
+
+ResetBattleState()
+
 return {
     HealthTab = HealthTab,
     bossHealth = bossHealth,
@@ -138,5 +147,6 @@ return {
 
     ResetBattleState = ResetBattleState,
 
-    bossPhase = bossPhase
+    bossPhase = bossPhase,
+    Phase2 = Phase2
 }

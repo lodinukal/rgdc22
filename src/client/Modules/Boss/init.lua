@@ -2,6 +2,7 @@ local SoundService = game:GetService("SoundService")
 local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BattleFolder = workspace:WaitForChild("Boss")
@@ -16,6 +17,7 @@ local Hit = Particles:WaitForChild("Hit")
 
 local Ship = BattleFolder:WaitForChild("Ship") :: Model
 
+local BossTransition = require(script.Parent.Parent.Gui.BossTransition)
 local Dialogue = require(script.Parent.Parent.Gui.Dialogue)
 local BossBattle = require(script.Parent.Parent.Gui.BossBattle)
 
@@ -28,13 +30,14 @@ local BossRoar = SoundService:WaitForChild("Roar")
 
 local oldfirstperson = nil
 local FirstPerson = require(script.Parent.FirstPersonModule)
+local originalCFrame = Invader.PrimaryPart.CFrame
 
 local Cache = {}
 local Started = false
 local Projectiles = {}
 
 local ShipPos = 0.5
-local SHIP_SPEED_PER = 0.5
+local SHIP_SPEED_PER = 0.75
 
 local function RenderStepCleanup()
     for id, _ in pairs(Cache) do
@@ -53,7 +56,6 @@ local bossPos = 0.5
 local function StartBossAnimation()
     local amplitude = 120
     local elapsed = 0
-    local originalCFrame = Invader.PrimaryPart.CFrame
     local seed = math.random(1, 100)
     Bind("boss_mesh", Enum.RenderPriority.Camera.Value, function(delta)
         elapsed += delta
@@ -100,9 +102,22 @@ end
 local enabled = false
 local function Cleanup()
     enabled = false
+
+    task.spawn(function()
+        for i = #Projectiles, 1, -1 do
+            local projectile = Projectiles[i]
+            local part = projectile.Part
+            part:Destroy()
+            table.remove(Projectiles, i)
+        end
+    end)
+
+    RenderStepCleanup()
+end
+
+local function CleanupLate()
 	workspace.CurrentCamera.CameraType = oldfirstperson
     FirstPerson:Start()
-    RenderStepCleanup()
 end
 
 local bodyfx = Invader:WaitForChild("Body"):WaitForChild("FX")
@@ -123,6 +138,25 @@ local function Move1()
 
     table.insert(Projectiles, {
         Part = newProjectile
+    })
+end
+
+local function Move1d2()
+    local newProjectile = Projectile:Clone()
+    newProjectile.CFrame = ShootPart.CFrame
+    newProjectile.Parent = BattleFolder
+    newProjectile.CFrame *= CFrame.Angles(0, 0, math.rad(math.random(-10, 10)))
+
+    local newProjectile2 = Projectile:Clone()
+    newProjectile2.CFrame = ShootPart.CFrame
+    newProjectile2.Parent = BattleFolder
+    newProjectile2.CFrame *= CFrame.Angles(0, 0, math.rad(math.random(-10, 10)))
+
+    table.insert(Projectiles, {
+        Part = newProjectile
+    })
+    table.insert(Projectiles, {
+        Part = newProjectile2
     })
 end
 
@@ -153,41 +187,124 @@ local function Move3()
     end
 end
 
+local function Move4()
+    for i = 1, 4 do
+        bossPos = math.random(-1, 1)
+        task.wait(1)
+        Move1d2()
+    end
+end
+
 local function Dodge()
     local x = math.sign(bossPos)
 
     bossPos += -x * (math.random(6, 12) / 10)
 end
 
+local recMode = false
 local function Fire()
-    if BossBattle.bossPhase:get() == 1 then
-        local random = math.random(1, 100)
+    if recMode then
+        return
+    end
+
+    if BossBattle.bossPhase:get() == 1 and enabled then
+        local random = math.random(1, 4)
         local dodgeRandom = math.random(1, 30)
-        if random < 45 then
+        if random < 2 then
             Move1()
-        elseif random < 90 then
+        elseif random < 3 then
             Move2()
-        elseif random < 100 then
+        elseif random < 4 then
             Move3()
         end
         if dodgeRandom < 20 then
             Dodge()
         end
+    else
+        local random = math.random(1, 4)
+        local dodgeRandom = math.random(1, 30)
+        if random < 2 then
+            Move2()
+        elseif random < 3 then
+            Move3()
+        elseif random < 4 then
+            Move4()
+        end
+        if dodgeRandom < 25 then
+            Dodge()
+        end
     end
 end
 
+local function BossDeath()
+    Cleanup()
+end
+
 local function HitBoss()
-    BossBattle.bossHealth:set(BossBattle.bossHealth:get() - 5)
+    if recMode then
+        return
+    end
+    BossBattle.bossHealth:set(BossBattle.bossHealth:get() - 4)
+    if BossBattle.bossHealth:get() <= 0 then
+        if BossBattle.bossPhase:get() == 1 then
+            Dialogue.enabled:set(true)
+            recMode = true
+            Dialogue.event:Fire("Space Invader", {
+                "This isn't over. Death is enshrined in your fortune.",
+            })
+            task.wait(1)
+            -- TODO: Effects
+            BossBattle.Phase2()
+            Energise()
+            Invader.PrimaryPart.Color = Color3.fromRGB(148, 20, 245)
+            task.wait(2)
+            Energise()
+            task.wait(2)
+            Energise()
+            recMode = false
+        else
+            Dialogue.enabled:set(true)
+            Dialogue.event:Fire("Space Invader", {
+                "H|-||H|ow|, d|-d||id| y|o||u||, -",
+            })
+            recMode = true
+            Energise()
+            BossDeath()
+            -- TODO: Death fx
+            -- TODO: Congrats screen
+        end
+    end
 end
 
 local function HitUs()
     BossBattle.shipHealth:set(BossBattle.shipHealth:get() - 1)
+    if BossBattle.shipHealth:get() <= 0 then
+        Dialogue.enabled:set(true)
+        Cleanup()
+        Dialogue.event:Fire("Space Invader", {
+            "Goodbye,| cosmonaut,| rest with your weak brethern.",
+        })
+        -- TODO: respawn
+        Dialogue.completed:Wait()
+        BossBattle.ResetBattleState()
+        BossBattle.enabled:set(false)
+
+        CleanupLate()
+        task.wait()
+        Players.LocalPlayer.Character.Humanoid.Health = 0
+
+        -- task.wait(5)
+		-- shared.Levels:ResetLevel()
+    end
 end
 
 local function Simulate()
-    RunService.Heartbeat:Connect(function(deltaTime)
+    Bind("bullet_checks", Enum.RenderPriority.Character.Value, function(deltaTime)
         for i = #Projectiles, 1, -1 do
             local projectile = Projectiles[i]
+            if not projectile then
+                return
+            end
             local part = projectile.Part
 
             part.CFrame *= CFrame.new(0,0, -60*deltaTime)
@@ -196,7 +313,10 @@ local function Simulate()
             params.FilterDescendantsInstances = {Invader, Ship.Shield, BoundBox}
             params.FilterType = Enum.RaycastFilterType.Whitelist
 
-            local result = workspace:Raycast(part.Position, part.CFrame.LookVector, params)
+            local result = workspace:Raycast(part.Position, part.CFrame.LookVector * 2, params)
+            if not result then
+                result = workspace:Raycast(part.Position, -part.CFrame.LookVector * 2, params)
+            end
             if result then
                 if result.Instance:IsDescendantOf(Invader) then
                     table.remove(Projectiles, i)
@@ -222,6 +342,8 @@ local function Begin(self)
         Cleanup()
     end
 
+    Invader.PrimaryPart.Color = Color3.fromRGB(245, 72, 20)
+
     Started = true
     enabled = true
     oldfirstperson = workspace.CurrentCamera.CameraType
@@ -243,7 +365,9 @@ local function Begin(self)
     Energise()
     Simulate()
 
-    while task.wait(1) and enabled do
+    
+
+    while enabled and task.wait(if BossBattle.bossPhase:get() == 1 then 1 else 0.5) do
         Fire()
     end
 end

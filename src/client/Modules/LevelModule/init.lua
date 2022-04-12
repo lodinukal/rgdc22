@@ -236,4 +236,5 @@ function LevelModule:ResetLevel()
 	self:LoadLevel(self.CurrentLevelName or LevelOrder[1])
 end
 
+shared.Levels = LevelModule
 return LevelModule
