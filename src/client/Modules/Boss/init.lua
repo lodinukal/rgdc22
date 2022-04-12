@@ -103,52 +103,44 @@ end
 local function Fire()
     local newProjectile = Projectile:Clone()
     newProjectile.CFrame = ShootPart.CFrame
-    newProjectile.Anchored = false
     newProjectile.Parent = BattleFolder
-    newProjectile:ApplyImpulse(ShootPart.CFrame.LookVector * math.random(150, 300))
 
-    local connection
-    connection = newProjectile.AncestryChanged:Connect(function(child, parent)
-        connection:Disconnect()
-        Projectiles[newProjectile] = nil
-    end)
-
-    Projectiles[newProjectile] = connection
+    table.insert(Projectiles, {
+        Part = newProjectile,
+        MovingBackwards = false
+    })
 end
 
-local function OnHit(projectileCFrame)
-    local newHit = Hit:Clone()
-    newHit.CFrame = projectileCFrame
-    newHit.Parent = BattleFolder
-
-    task.spawn(function()
-        for i, v in ipairs(newHit:GetChildren()) do
-            v:Emit()
-        end
-
-        task.wait(2)
-
-        newHit:Destroy()
-    end)
+local function HitBoss()
+    print("Hit!")
 end
 
-local function HitDetection()
+local function Simulate()
     RunService.Heartbeat:Connect(function(deltaTime)
-        for i, v in pairs(Projectiles) do
+        for i = #Projectiles, 1, -1 do
+            local projectile = Projectiles[i]
+            local part = projectile.Part
+            local movingBackwards = projectile.MovingBackwards
+
+            part.CFrame *= CFrame.new(0,0, movingBackwards and 60*deltaTime or -60*deltaTime)
+
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {Ship}
+            params.FilterDescendantsInstances = {movingBackwards and Invader or Ship.Shield}
             params.FilterType = Enum.RaycastFilterType.Whitelist
-            local result = workspace:Raycast(i.Position, i.CFrame.LookVector, params)
+
+            local result = workspace:Raycast(part.Position, movingBackwards and -part.CFrame.LookVector or part.CFrame.LookVector, params)
             if result then
-                OnHit(i.CFrame)
-                v:Disconnect()
-                Projectiles[i] = nil
-                i:Destroy()
+                if movingBackwards then
+                    table.remove(Projectiles, i)
+                    part:Destroy()
+                    HitBoss()
+                else
+                    projectile.MovingBackwards = true
+                end
             end
         end
     end)
 end
-
 
 local function Begin(self)
     if Started then
@@ -169,7 +161,7 @@ local function Begin(self)
 	})
     task.wait(0.4)
     Energise()
-    HitDetection()
+    Simulate()
 
     while task.wait(1) do
         Fire()
