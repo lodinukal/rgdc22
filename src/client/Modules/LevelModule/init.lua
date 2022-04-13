@@ -67,10 +67,10 @@ local LevelOrder = {
 }
 
 if RunService:IsStudio() then
-	LevelOrder = {
-		-- "Bridge Foyer",
-		"The Bridge"
-	}
+	-- LevelOrder = {
+	-- 	-- "Bridge Foyer",
+	-- 	"The Bridge"
+	-- }
 end
 
 local LevelModule = {}
@@ -223,11 +223,15 @@ function LevelModule:UnloadLevel(map)
 	map:Destroy()
 end
 
-function LevelModule:ResetLevel()
+function LevelModule:DestroyCurrent()
 	local currentLevelFolder = self.CurrentLevelFolder
 	if currentLevelFolder then
 		self:UnloadLevel(currentLevelFolder)
 	end
+end
+
+function LevelModule:ResetLevel()
+	self:DestroyCurrent()
 
 	local character = Player.Character or Player.CharacterAdded:Wait()
 	if not character.PrimaryPart then

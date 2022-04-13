@@ -28,6 +28,9 @@ local function HandleUnhit(part: BasePart)
 end
 
 local function SetFireTrap(fireTrap: Model, bool: boolean)
+	if not fireTrap:IsDescendantOf(workspace) then
+		return
+	end
 	FireTrapEnabled[fireTrap] = bool
 	local src = fireTrap:WaitForChild("Source")
 	for _, child in ipairs(src:GetChildren()) do
@@ -40,6 +43,10 @@ local function SetFireTrap(fireTrap: Model, bool: boolean)
 end
 
 local function FireTrapAdded(fireTrap: Model)
+	if not fireTrap:IsDescendantOf(workspace) then
+		return
+	end
+
 	local delay = fireTrap:GetAttribute("Delay") or NumberRange.new(0)
 	delay = math.random(delay.Min, delay.Max)
 	local active = fireTrap:GetAttribute("DurationActive") or 2

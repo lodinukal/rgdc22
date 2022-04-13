@@ -19,15 +19,14 @@ local VIEW_CHECK = 0.1
 local MORPH_SPEED = 12
 local SHOVE_SPEED = 3
 
-local rotationSpeed = 10
+local rotationSpeed = 15
 
 UserInputService.InputChanged:Connect(function(input, gameProcessedEvent)
 	-- if gameProcessedEvent then
 	-- 	return
 	-- end
 	if input.UserInputType == Enum.UserInputType.MouseWheel then
-		rotationSpeed = math.clamp(rotationSpeed + input.Position.Z, 0, 30)
-		print(rotationSpeed)
+		-- rotationSpeed = math.clamp(rotationSpeed + input.Position.Z, 0, 30)
 	end
 end)
 

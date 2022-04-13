@@ -229,37 +229,37 @@ function LaserModule:Start()
 		self.CachedSources[source] = nil
 	end)
 
-	local arcHandles
-	ContextActionService:BindAction("SelectMirror", function(actionName, inputState, inputObject)
-		if inputState == Enum.UserInputState.Begin then
-			local target = Mouse.Target
+	-- local arcHandles
+	-- ContextActionService:BindAction("SelectMirror", function(actionName, inputState, inputObject)
+	-- 	if inputState == Enum.UserInputState.Begin then
+	-- 		local target = Mouse.Target
 
-			if not self:IsMirror(target) then
-				return
-			end
+	-- 		if not self:IsMirror(target) then
+	-- 			return
+	-- 		end
 
-			if arcHandles then
-				arcHandles:Destroy()
-				if arcHandles.Adornee == target then
-					arcHandles = nil
-					return
-				end
-			end
+	-- 		-- if arcHandles then
+	-- 		-- 	arcHandles:Destroy()
+	-- 		-- 	if arcHandles.Adornee == target then
+	-- 		-- 		arcHandles = nil
+	-- 		-- 		return
+	-- 		-- 	end
+	-- 		-- end
 
-			arcHandles = Instance.new("ArcHandles")
-			arcHandles.Adornee = target
-			arcHandles.Parent = Player:WaitForChild("PlayerGui")
+	-- 		-- arcHandles = Instance.new("ArcHandles")
+	-- 		-- arcHandles.Adornee = target
+	-- 		-- arcHandles.Parent = Player:WaitForChild("PlayerGui")
 
-			local lastCFrame = CFrame.new()
-			arcHandles.MouseDrag:Connect(function(axis, relativeAngle, delta)
-				target.CFrame = lastCFrame * CFrame.Angles(unpack(AngleFromAxis(axis, relativeAngle)))
-			end)
+	-- 		local lastCFrame = CFrame.new()
+	-- 		-- arcHandles.MouseDrag:Connect(function(axis, relativeAngle, delta)
+	-- 		-- 	target.CFrame = lastCFrame * CFrame.Angles(unpack(AngleFromAxis(axis, relativeAngle)))
+	-- 		-- end)
 
-			arcHandles.MouseButton1Down:Connect(function()
-				lastCFrame = target.CFrame
-			end)
-		end
-	end, false, Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch)
+	-- 		-- arcHandles.MouseButton1Down:Connect(function()
+	-- 		-- 	lastCFrame = target.CFrame
+	-- 		-- end)
+	-- 	end
+	-- end, false, Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch)
 
 	RunService.Heartbeat:Connect(function(deltaTime)
 		self:Clear()

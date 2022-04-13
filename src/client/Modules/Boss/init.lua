@@ -238,6 +238,7 @@ local function Fire()
         local dodgeRandom = math.random(1, 30)
         if random < 2 then
             Move2()
+            Move4()
         elseif random < 3 then
             Move3()
         elseif random < 4 then
@@ -252,6 +253,7 @@ end
 local function BossDeath()
     CleanupLate()
     Players.LocalPlayer.Character:SetPrimaryPartCFrame(workspace:WaitForChild("End"):GetPrimaryPartCFrame())
+    shared.Levels:DestroyCurrent()
 end
 
 local function HitBoss()
@@ -333,7 +335,7 @@ local function Simulate()
             end
             local part = projectile.Part
 
-            part.CFrame *= CFrame.new(0,0, -80*deltaTime)
+            part.CFrame *= CFrame.new(0,0, -(if BossBattle.bossPhase:get() == 1 then 80 else 140)*deltaTime)
 
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {Invader, if projectile.reflected then nil else Ship.Shield, BoundBox}
