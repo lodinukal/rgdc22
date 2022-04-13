@@ -5,10 +5,13 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Common = ReplicatedStorage:WaitForChild("Common")
+local Spring = require(Common:WaitForChild("Spring"))
+
 local BattleFolder = workspace:WaitForChild("Boss")
 local Invader = BattleFolder:WaitForChild("Invader")
 local CameraPart = BattleFolder:WaitForChild("Camera")
-local Projectile = BattleFolder:WaitForChild("Projectile")
+local Projectile = ReplicatedStorage:WaitForChild("Projectile")
 local ShootPart = Invader:WaitForChild("ShootPart")
 local BoundBox = BattleFolder:WaitForChild("BoundBox")
 
@@ -77,14 +80,24 @@ local function CameraSwivels()
     end)
 end
 
+local function GetUpdatedBossShipPosition(deltaTime)
+    local dir = (if UserInputService:IsKeyDown(Enum.KeyCode.S) or UserInputService:IsKeyDown(Enum.KeyCode.Down) then -1 else 0) +
+        (if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then 1 else 0)
+
+    ShipPos = math.clamp(ShipPos + SHIP_SPEED_PER * dir * deltaTime, 0, 1)
+    local lerpedPosition = Boundaries[1].Position:Lerp(Boundaries[2].Position, ShipPos)
+
+    return lerpedPosition
+end
+
+local ShipSpring = Spring.new(GetUpdatedBossShipPosition(0))
+ShipSpring.Damper = 0.95
+ShipSpring.Speed = 5
+
 local function UpdateShipPosition()
     Bind("boss_ship", Enum.RenderPriority.Input.Value, function(deltaTime)
-        local dir = (if UserInputService:IsKeyDown(Enum.KeyCode.S) or UserInputService:IsKeyDown(Enum.KeyCode.Down) then -1 else 0) +
-            (if UserInputService:IsKeyDown(Enum.KeyCode.W) or UserInputService:IsKeyDown(Enum.KeyCode.Up) then 1 else 0)
-
-        ShipPos = math.clamp(ShipPos + SHIP_SPEED_PER * dir * deltaTime, 0, 1)
-        local lerpedPosition = Boundaries[1].Position:Lerp(Boundaries[2].Position, ShipPos)
-        Ship:SetPrimaryPartCFrame(Boundaries[1].CFrame.Rotation + lerpedPosition)
+        ShipSpring.Target = GetUpdatedBossShipPosition(deltaTime)
+        Ship:SetPrimaryPartCFrame(CFrame.new(ShipSpring.Position) * Boundaries[1].CFrame.Rotation)
     end)
 end
 
