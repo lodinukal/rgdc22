@@ -67,13 +67,15 @@ local function DeathScreen(props)
                 [Children] = {
                     New "TextLabel" {
                         AnchorPoint = Vector2.new(1, 1),
-                        Position = UDim2.fromScale(1, 1),
+                        Position = UDim2.new(1, -10, 1, 0),
                         Size = UDim2.fromScale(0.4, 0.1),
                         Text = Computed(function()
                             return text:get()
                         end),
                         Font = Enum.Font.Gotham,
-                        Transparency = tweenedTransparency,
+                        BackgroundTransparency = 1,
+                        TextTransparency = tweenedTransparency,
+                        TextXAlignment = Enum.TextXAlignment.Right,
                         TextSize = 20,
                         TextColor3 = Color3.fromRGB(255, 255, 255)
                     }
