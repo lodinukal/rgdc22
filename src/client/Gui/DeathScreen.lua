@@ -59,7 +59,7 @@ local function DeathScreen(props)
             New "Frame" {
                 ZIndex = 0,
                 Size = UDim2.fromScale(1, 1),
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
                 Transparency = tweenedTransparency,
                 Visible = Computed(function()
                     return tweenedTransparency:get() <= 0.999
@@ -75,7 +75,7 @@ local function DeathScreen(props)
                         Font = Enum.Font.Gotham,
                         Transparency = tweenedTransparency,
                         TextSize = 20,
-                        TextColor3 = Color3.fromRGB(0, 0, 0)
+                        TextColor3 = Color3.fromRGB(255, 255, 255)
                     }
                 }
             }
